@@ -276,7 +276,7 @@ const ProfessionalTemplates = () => {
   ];
 
   return (
-    <section id="templates" className="py-24">
+    <section id="templates" className="py-24 bg-gradient-to-b from-background via-background/95 to-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <div className="inline-flex items-center glass rounded-full px-6 py-2 mb-6">
@@ -297,15 +297,15 @@ const ProfessionalTemplates = () => {
 
         {/* Category Tabs */}
         <div className="flex justify-center mb-12">
-          <div className="flex bg-card/50 backdrop-blur-sm rounded-full p-1 border">
+          <div className="flex bg-card/80 backdrop-blur-sm rounded-2xl p-1.5 border border-border/50 shadow-lg">
             {Object.keys(templateCategories).map((category) => (
               <button
                 key={category}
                 onClick={() => setActiveCategory(category)}
-                className={`px-8 py-3 rounded-full text-sm font-medium transition-all duration-300 ${
+                className={`px-8 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
                   activeCategory === category
-                    ? 'bg-primary text-primary-foreground shadow-lg'
-                    : 'text-muted-foreground hover:text-primary'
+                    ? 'bg-primary text-primary-foreground shadow-lg scale-105'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                 }`}
               >
                 {category}
@@ -315,16 +315,16 @@ const ProfessionalTemplates = () => {
         </div>
 
         {/* Templates Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
           {templateCategories[activeCategory as keyof typeof templateCategories].map((template) => (
-            <Card key={template.id} className="glass overflow-hidden border-2 border-transparent hover:border-primary/20 transition-all duration-300">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl mb-2">{template.name}</CardTitle>
-                <p className="text-sm text-muted-foreground mb-4">{template.description}</p>
+            <Card key={template.id} className="bg-card/95 backdrop-blur-sm border border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 rounded-2xl overflow-hidden">
+              <CardHeader className="pb-4 space-y-4">
+                <CardTitle className="text-2xl font-bold text-foreground">{template.name}</CardTitle>
+                <p className="text-muted-foreground text-sm leading-relaxed">{template.description}</p>
                 
                 {/* Preview Text */}
-                <div className="bg-muted/30 rounded-lg p-4 mb-4">
-                  <p className="text-sm italic text-muted-foreground">"{template.previewText}"</p>
+                <div className="bg-muted/40 rounded-xl p-4 border border-border/20">
+                  <p className="text-sm italic text-muted-foreground font-medium">"{template.previewText}"</p>
                 </div>
               </CardHeader>
 
@@ -333,7 +333,7 @@ const ProfessionalTemplates = () => {
                   <CollapsibleTrigger asChild>
                     <Button 
                       variant="outline" 
-                      className="w-full mb-4 border-primary/30 hover:border-primary hover:bg-primary/5"
+                      className="w-full mb-4 bg-primary/5 border-primary/20 hover:border-primary hover:bg-primary/10 text-foreground font-medium rounded-xl h-12"
                       onClick={() => handleTemplateExpand(template.id)}
                     >
                       Use Template
@@ -345,23 +345,23 @@ const ProfessionalTemplates = () => {
                     </Button>
                   </CollapsibleTrigger>
 
-                  <CollapsibleContent className="space-y-4">
+                  <CollapsibleContent className="space-y-4 mt-4 p-4 bg-muted/20 rounded-xl border border-border/20">
                     {templateForms[template.id] && (
                       <>
                         <div>
-                          <Label htmlFor={`idea-${template.id}`}>Idea of the video *</Label>
+                          <Label htmlFor={`idea-${template.id}`} className="text-sm font-medium text-foreground mb-2 block">Idea of the video *</Label>
                           <Textarea
                             id={`idea-${template.id}`}
                             value={templateForms[template.id].idea}
                             onChange={(e) => updateForm(template.id, 'idea', e.target.value)}
                             placeholder="Describe your video idea..."
-                            className="min-h-[80px]"
+                            className="min-h-[80px] bg-background/50 border-border/50 focus:border-primary rounded-lg"
                           />
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <Label htmlFor={`duration-${template.id}`}>Duration (seconds)</Label>
+                            <Label htmlFor={`duration-${template.id}`} className="text-sm font-medium text-foreground mb-2 block">Duration (seconds)</Label>
                             <Input
                               id={`duration-${template.id}`}
                               type="number"
@@ -369,21 +369,22 @@ const ProfessionalTemplates = () => {
                               onChange={(e) => updateForm(template.id, 'duration', e.target.value)}
                               min="15"
                               max="300"
+                              className="bg-background/50 border-border/50 focus:border-primary rounded-lg"
                             />
                           </div>
 
                           <div>
-                            <Label htmlFor={`frameSize-${template.id}`}>Frame Size</Label>
+                            <Label htmlFor={`frameSize-${template.id}`} className="text-sm font-medium text-foreground mb-2 block">Frame Size</Label>
                             <Select 
                               value={templateForms[template.id].frameSize} 
                               onValueChange={(value) => updateForm(template.id, 'frameSize', value)}
                             >
-                              <SelectTrigger>
+                              <SelectTrigger className="bg-background/50 border-border/50 focus:border-primary rounded-lg">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent>
+                              <SelectContent className="bg-card border-border/50 rounded-lg">
                                 {frameSizeOptions.map((size) => (
-                                  <SelectItem key={size} value={size.split(' ')[0]}>{size}</SelectItem>
+                                  <SelectItem key={size} value={size.split(' ')[0]} className="hover:bg-muted/50">{size}</SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
@@ -391,54 +392,54 @@ const ProfessionalTemplates = () => {
                         </div>
 
                         <div>
-                          <Label htmlFor={`voice-${template.id}`}>Voice</Label>
+                          <Label htmlFor={`voice-${template.id}`} className="text-sm font-medium text-foreground mb-2 block">Voice</Label>
                           <Select 
                             value={templateForms[template.id].voice} 
                             onValueChange={(value) => updateForm(template.id, 'voice', value)}
                           >
-                            <SelectTrigger>
+                            <SelectTrigger className="bg-background/50 border-border/50 focus:border-primary rounded-lg">
                               <SelectValue />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="bg-card border-border/50 rounded-lg">
                               {voiceOptions.map((voice) => (
-                                <SelectItem key={voice} value={voice}>{voice}</SelectItem>
+                                <SelectItem key={voice} value={voice} className="hover:bg-muted/50">{voice}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </div>
 
                         <div>
-                          <Label htmlFor={`style-${template.id}`}>Style</Label>
+                          <Label htmlFor={`style-${template.id}`} className="text-sm font-medium text-foreground mb-2 block">Style</Label>
                           <Select 
                             value={templateForms[template.id].style} 
                             onValueChange={(value) => updateForm(template.id, 'style', value)}
                           >
-                            <SelectTrigger>
+                            <SelectTrigger className="bg-background/50 border-border/50 focus:border-primary rounded-lg">
                               <SelectValue />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="bg-card border-border/50 rounded-lg">
                               {styleOptions.map((style) => (
-                                <SelectItem key={style} value={style}>{style}</SelectItem>
+                                <SelectItem key={style} value={style} className="hover:bg-muted/50">{style}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </div>
 
                         <div>
-                          <Label htmlFor={`characters-${template.id}`}>Character(s) in the video</Label>
+                          <Label htmlFor={`characters-${template.id}`} className="text-sm font-medium text-foreground mb-2 block">Character(s) in the video</Label>
                           <Textarea
                             id={`characters-${template.id}`}
                             value={templateForms[template.id].characters}
                             onChange={(e) => updateForm(template.id, 'characters', e.target.value)}
                             placeholder="Describe the characters or people in your video..."
-                            className="min-h-[60px]"
+                            className="min-h-[60px] bg-background/50 border-border/50 focus:border-primary rounded-lg"
                           />
                         </div>
 
                         <Button 
                           onClick={() => handleGenerateVideo(template.id)}
                           disabled={isGenerating}
-                          className="w-full cta-primary mt-4"
+                          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl h-12 mt-6 shadow-lg shadow-primary/20"
                         >
                           {isGenerating ? "Generating Video..." : "Generate Video"}
                         </Button>
