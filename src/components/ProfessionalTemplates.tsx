@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronUp, Play } from "lucide-react";
+import { ChevronDown, ChevronUp, Play, Briefcase, Heart, GraduationCap, BookOpen, PartyPopper, Megaphone, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Template {
@@ -101,7 +101,6 @@ const templateCategories = {
 const allTemplates = Object.values(templateCategories).flat();
 
 const ProfessionalTemplates = () => {
-  console.log("ProfessionalTemplates component loaded"); // Debug log to force refresh
   const [activeCategory, setActiveCategory] = useState<string>("Marketing");
   const [expandedTemplate, setExpandedTemplate] = useState<string | null>(null);
   const [templateForms, setTemplateForms] = useState<Record<string, TemplateForm>>({});
