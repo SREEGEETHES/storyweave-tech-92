@@ -1,0 +1,228 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* AI Clips Universe Design System */
+
+@layer base {
+  :root {
+    /* Cosmic dark theme - Dark blue to violet gradient */
+    --background: 240 100% 4%;
+    --foreground: 210 20% 98%;
+
+    --card: 245 100% 7%;
+    --card-foreground: 210 20% 98%;
+
+    --popover: 245 100% 7%;
+    --popover-foreground: 210 20% 98%;
+
+    /* Neon cyan primary palette */
+    --primary: 180 100% 50%;
+    --primary-foreground: 240 100% 4%;
+    --primary-hover: 180 100% 60%;
+
+    /* Pink accent colors */
+    --secondary: 240 50% 12%;
+    --secondary-foreground: 210 20% 98%;
+
+    --accent: 320 100% 70%;
+    --accent-foreground: 210 20% 98%;
+
+    --muted: 220 30% 15%;
+    --muted-foreground: 220 15% 65%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 20% 98%;
+
+    --border: 220 30% 15%;
+    --input: 220 30% 15%;
+    --ring: 180 100% 50%;
+
+    --radius: 0.75rem;
+
+    /* Cosmic colors */
+    --hero-gradient-start: 240 100% 8%;
+    --hero-gradient-end: 280 100% 20%;
+    --cosmic-gradient: linear-gradient(135deg, hsl(240 100% 8%), hsl(280 100% 20%));
+    
+    --feature-accent: 180 100% 50%;
+    --success: 142 71% 45%;
+    --warning: 38 92% 50%;
+    
+    /* Neon glass morphism */
+    --glass-bg: 220 100% 6% / 0.4;
+    --glass-border: 180 100% 50% / 0.2;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* Gradients */
+  .gradient-hero {
+    background: linear-gradient(135deg, hsl(var(--hero-gradient-start)), hsl(var(--hero-gradient-end)));
+  }
+  
+  .gradient-feature {
+    background: linear-gradient(145deg, hsl(var(--card)), hsl(var(--secondary)));
+  }
+  
+  /* Glass morphism effects */
+  .glass {
+    background: hsl(var(--glass-bg));
+    border: 1px solid hsl(var(--glass-border));
+    backdrop-filter: blur(12px);
+  }
+  
+  /* Custom animations */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+    opacity: 0;
+  }
+
+  .delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .delay-400 {
+    animation-delay: 400ms;
+  }
+
+  .delay-600 {
+    animation-delay: 600ms;
+  }
+
+  .delay-700 {
+    animation-delay: 700ms;
+  }
+
+  .delay-1000 {
+    animation-delay: 1000ms;
+  }
+
+  .delay-500 {
+    animation-delay: 500ms;
+  }
+}
+
+@layer components {
+  /* Hero section styling */
+  .hero-title {
+    @apply text-6xl md:text-7xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent leading-tight;
+  }
+  
+  .hero-subtitle {
+    @apply text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed;
+  }
+  
+  /* Feature cards */
+  .feature-card {
+    @apply glass rounded-2xl p-8 hover:scale-105 transition-all duration-300 border-border/50 hover:border-primary/50;
+  }
+  
+  /* CTA buttons */
+  .cta-primary {
+    @apply bg-gradient-to-r from-primary to-accent hover:from-primary-hover hover:to-accent text-primary-foreground px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105;
+  }
+  
+  .cta-secondary {
+    @apply glass border-primary/30 hover:border-primary/60 text-foreground px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover:scale-105;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+  }
+  to {
+    box-shadow: 0 0 30px hsl(var(--primary) / 0.6), 0 0 40px hsl(var(--accent) / 0.3);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
