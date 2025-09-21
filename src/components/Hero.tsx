@@ -1,10 +1,31 @@
 import { Button } from "@/components/ui/button";
 import { Play, Sparkles, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import heroImage from "@/assets/hero-bg.jpg";
 
 const Hero = () => {
   const navigate = useNavigate();
+  const [isYearly, setIsYearly] = useState(true);
+  
+  // Mock authentication state - in a real app this would come from your auth provider
+  const isLoggedIn = false; // Change this to test different states
+  
+  const handleStartFree = () => {
+    if (!isLoggedIn) {
+      navigate('/signup', { state: { planType: 'free' } });
+    } else {
+      navigate('/payment-portal', { state: { planType: 'free' } });
+    }
+  };
+
+  const handleStartProTrial = () => {
+    if (!isLoggedIn) {
+      navigate('/signup', { state: { planType: 'pro' } });
+    } else {
+      navigate('/payment-portal', { state: { planType: 'pro' } });
+    }
+  };
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background with overlay */}
@@ -48,21 +69,36 @@ const Hero = () => {
             engaging AI videos that captivate your audience and boost your social media presence.
           </p>
 
+          {/* Pricing Toggle */}
+          <div className="flex items-center justify-center space-x-4 mb-8 animate-fade-in delay-300">
+            <span className={`text-muted-foreground ${!isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>Monthly</span>
+            <button 
+              onClick={() => setIsYearly(!isYearly)}
+              className="relative glass rounded-full p-1 w-16 h-8"
+            >
+              <div className={`absolute top-1 w-6 h-6 bg-primary rounded-full transition-transform ${
+                isYearly ? 'translate-x-8' : 'translate-x-1'
+              }`} />
+            </button>
+            <span className={`${isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>
+              Yearly <span className="text-feature-accent">(Save 20%)</span>
+            </span>
+          </div>
+
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 animate-fade-in delay-400">
             <Button 
               className="cta-primary"
-              onClick={() => navigate('/signup')}
+              onClick={handleStartFree}
             >
-              Start Free Trial
+              Start Free
               <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
             <Button 
               className="cta-secondary"
-              onClick={() => navigate('/features')}
+              onClick={handleStartProTrial}
             >
-              <Play className="w-5 h-5 mr-2" />
-              Watch Demo
+              Start Pro Trial
             </Button>
           </div>
 

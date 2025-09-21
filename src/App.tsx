@@ -13,6 +13,7 @@ import Dashboard from "./pages/Dashboard";
 import VideoEditor from "./pages/VideoEditor";
 import CharacterCreator from "./pages/CharacterCreator";
 import CustomStyleCreator from "./pages/CustomStyleCreator";
+import PaymentPortal from "./pages/PaymentPortal";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/editor" element={<VideoEditor />} />
             <Route path="/custom-style" element={<CustomStyleCreator />} />
             <Route path="/character-creator" element={<CharacterCreator />} />
+            <Route path="/payment-portal" element={<PaymentPortal />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

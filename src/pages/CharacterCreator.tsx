@@ -156,34 +156,13 @@ const CharacterCreator = () => {
           </div>
 
           {!generatedCharacter ? (
-            <Card className="glass">
-              <CardHeader>
-                <CardTitle>Create Custom Character</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Portrait Upload */}
-                <div className="text-center">
-                  <div 
-                    className="w-32 h-32 rounded-full bg-muted mx-auto mb-4 cursor-pointer border-2 border-dashed border-border hover:border-primary transition-colors flex items-center justify-center overflow-hidden"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    {uploadedImage ? (
-                      <img src={uploadedImage} alt="Portrait" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="text-center">
-                        <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                        <span className="text-sm text-muted-foreground">Portrait</span>
-                      </div>
-                    )}
-                  </div>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                </div>
+            <div className="flex justify-center">
+              <Card className="glass max-w-2xl w-full">
+                <CardHeader className="text-center">
+                  <CardTitle className="text-2xl">Create Custom Character</CardTitle>
+                  <p className="text-muted-foreground">Define detailed parameters for your character</p>
+                </CardHeader>
+                <CardContent className="space-y-6">
 
                 {/* Basic Info */}
                 <div className="space-y-4">
@@ -367,10 +346,11 @@ const CharacterCreator = () => {
                   disabled={isGenerating}
                   className="w-full cta-primary"
                 >
-                  {isGenerating ? "Generating..." : "Generate Avatar"}
+                  {isGenerating ? "Generating..." : "Create Character"}
                 </Button>
               </CardContent>
             </Card>
+            </div>
           ) : (
             /* Generated Character Display */
             <Card className="glass">

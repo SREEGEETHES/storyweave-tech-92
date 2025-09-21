@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
 import PricingPreview from "@/components/PricingPreview";
+import ProfessionalTemplates from "@/components/ProfessionalTemplates";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -14,6 +15,7 @@ const Index = () => {
       <main>
         <Hero />
         <Features />
+        <ProfessionalTemplates />
         <PricingPreview />
       </main>
       
