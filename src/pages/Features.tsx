@@ -33,20 +33,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import ProfessionalTemplates from "@/components/ProfessionalTemplates";
 
 const CharactersList = () => {
   const [savedCharacters, setSavedCharacters] = useState([]);
@@ -56,7 +44,7 @@ const CharactersList = () => {
     setSavedCharacters(characters);
   }, []);
 
-  const deleteCharacter = (characterId: string, characterName: string) => {
+  const deleteCharacter = (characterId: string) => {
     const updatedCharacters = savedCharacters.filter((char: any) => char.id !== characterId);
     setSavedCharacters(updatedCharacters);
     localStorage.setItem('savedCharacters', JSON.stringify(updatedCharacters));
@@ -70,35 +58,17 @@ const CharactersList = () => {
           {savedCharacters.map((character: any) => (
             <Card key={character.id} className="glass hover:scale-105 transition-transform cursor-pointer">
               <CardContent className="p-4 text-center relative">
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="absolute top-1 right-1 h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      ×
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Character</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to delete the character named "{character.name}"?
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => deleteCharacter(character.id, character.name)}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      >
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute top-1 right-1 h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteCharacter(character.id);
+                  }}
+                >
+                  ×
+                </Button>
                 <div className="w-16 h-16 rounded-full bg-gradient-to-r from-primary to-accent mx-auto mb-3 overflow-hidden">
                   {character.generatedImages?.[0] ? (
                     <img 
@@ -333,39 +303,19 @@ const Features = () => {
                           onClick={() => setSelectedStyle(style.id)}
                         >
                           <CardContent className="p-6 text-center relative">
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="absolute top-2 right-2 h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  ×
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Style</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to delete the style named "{style.name}"?
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => {
-                                      const updatedStyles = myStyles.filter((s: any) => s.id !== style.id);
-                                      setMyStyles(updatedStyles);
-                                      localStorage.setItem('myStyles', JSON.stringify(updatedStyles));
-                                    }}
-                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                  >
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="absolute top-2 right-2 h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const updatedStyles = myStyles.filter((s: any) => s.id !== style.id);
+                                setMyStyles(updatedStyles);
+                                localStorage.setItem('myStyles', JSON.stringify(updatedStyles));
+                              }}
+                            >
+                              ×
+                            </Button>
                             <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-accent to-primary mx-auto mb-4 flex items-center justify-center">
                               <Palette className="w-6 h-6 text-white" />
                             </div>
@@ -426,25 +376,45 @@ const Features = () => {
               </p>
             </div>
 
-            <div className="flex justify-center">
-              <Card className="glass max-w-2xl w-full">
-                <CardHeader className="text-center">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-r from-primary to-accent mx-auto mb-4 flex items-center justify-center">
-                    <Plus className="w-8 h-8 text-white" />
-                  </div>
-                  <CardTitle className="text-2xl">Create Custom Character</CardTitle>
-                  <p className="text-muted-foreground">Define detailed parameters for your character</p>
+            <div className="grid lg:grid-cols-2 gap-12">
+              <Card className="glass">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Upload className="w-5 h-5 text-primary" />
+                    Upload Image
+                  </CardTitle>
+                  <CardDescription>
+                    Upload a photo to create a custom avatar
+                  </CardDescription>
                 </CardHeader>
-                <CardContent className="text-center">
-                  <p className="text-muted-foreground mb-6">
-                    Click to start creating your custom character with detailed parameters
-                  </p>
-                  <Button 
-                    onClick={() => navigate('/character-creator')}
-                    className="cta-primary"
-                  >
-                    Create Character
-                  </Button>
+                <CardContent>
+                  <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors">
+                    <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground mb-2">Drag & drop an image or click to browse</p>
+                    <Button variant="outline">Choose File</Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card 
+                className="glass cursor-pointer hover:scale-105 transition-transform"
+                onClick={() => navigate('/character-creator')}
+              >
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Plus className="w-5 h-5 text-primary" />
+                    Create Custom Character
+                  </CardTitle>
+                  <CardDescription>
+                    Define detailed parameters for your character
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-8">
+                    <Plus className="w-12 h-12 text-primary mx-auto mb-4" />
+                    <p className="text-muted-foreground mb-4">Click to start creating your custom character with detailed parameters</p>
+                    <Button className="w-full cta-primary">Create Character</Button>
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -535,9 +505,6 @@ const Features = () => {
               </CardContent>
             </Card>
           </section>
-
-          {/* Professional Templates Section */}
-          <ProfessionalTemplates />
 
           {/* 5. Social Media Export */}
           <section id="social-export" className="py-16">

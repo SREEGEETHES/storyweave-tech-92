@@ -12,8 +12,8 @@ import { useToast } from "@/hooks/use-toast";
 interface Template {
   id: string;
   name: string;
+  icon: any;
   description: string;
-  previewText: string;
   category: string;
 }
 
@@ -26,82 +26,66 @@ interface TemplateForm {
   characters: string;
 }
 
-const templateCategories = {
-  Marketing: [
-    {
-      id: "product-launch",
-      name: "Product Launch",
-      description: "Introduce new products with impact",
-      previewText: "Introducing the revolutionary...",
-      category: "Marketing"
-    },
-    {
-      id: "brand-story", 
-      name: "Brand Story",
-      description: "Tell your company's journey",
-      previewText: "It all started with a simple idea...",
-      category: "Marketing"
-    },
-    {
-      id: "testimonial",
-      name: "Testimonial",
-      description: "Customer success stories",
-      previewText: "Here's what our customers say...",
-      category: "Marketing"
-    }
-  ],
-  Education: [
-    {
-      id: "course-intro",
-      name: "Course Intro", 
-      description: "Welcome students to your course",
-      previewText: "Welcome to the complete guide...",
-      category: "Education"
-    },
-    {
-      id: "tutorial",
-      name: "Tutorial",
-      description: "Step-by-step learning videos",
-      previewText: "In this tutorial, you'll learn...",
-      category: "Education"
-    },
-    {
-      id: "explainer",
-      name: "Explainer",
-      description: "Simplify complex concepts",
-      previewText: "Let me break this down for you...",
-      category: "Education"
-    }
-  ],
-  Entertainment: [
-    {
-      id: "storytelling",
-      name: "Storytelling",
-      description: "Engaging narrative content",
-      previewText: "Once upon a time...",
-      category: "Entertainment"
-    },
-    {
-      id: "comedy",
-      name: "Comedy",
-      description: "Humorous and fun content",
-      previewText: "Get ready to laugh...",
-      category: "Entertainment"
-    },
-    {
-      id: "lifestyle",
-      name: "Lifestyle",
-      description: "Daily life and experiences",
-      previewText: "Join me on this journey...",
-      category: "Entertainment"
-    }
-  ]
-};
-
-const allTemplates = Object.values(templateCategories).flat();
+const templates: Template[] = [
+  {
+    id: "marketing",
+    name: "Marketing",
+    icon: Megaphone,
+    description: "Create compelling marketing videos for products and services",
+    category: "Business"
+  },
+  {
+    id: "brand-story",
+    name: "Brand Story",
+    icon: Briefcase,
+    description: "Tell your brand's story with engaging narrative videos",
+    category: "Business"
+  },
+  {
+    id: "testimonial",
+    name: "Testimonial", 
+    icon: Heart,
+    description: "Showcase customer success stories and reviews",
+    category: "Social Proof"
+  },
+  {
+    id: "education",
+    name: "Education",
+    icon: GraduationCap,
+    description: "Create educational content and tutorials",
+    category: "Learning"
+  },
+  {
+    id: "explainer",
+    name: "Explainer",
+    icon: BookOpen,
+    description: "Explain complex concepts in simple terms",
+    category: "Learning"
+  },
+  {
+    id: "course-intro",
+    name: "Course Intro",
+    icon: Play,
+    description: "Engaging introductions for online courses",
+    category: "Learning"
+  },
+  {
+    id: "entertainment",
+    name: "Entertainment",
+    icon: PartyPopper,
+    description: "Fun and engaging entertainment content",
+    category: "Creative"
+  },
+  {
+    id: "social-media",
+    name: "Social Media",
+    icon: Users,
+    description: "Short-form content for social platforms",
+    category: "Social"
+  }
+];
 
 const ProfessionalTemplates = () => {
-  const [activeCategory, setActiveCategory] = useState<string>("Marketing");
   const [expandedTemplate, setExpandedTemplate] = useState<string | null>(null);
   const [templateForms, setTemplateForms] = useState<Record<string, TemplateForm>>({});
   const [isGenerating, setIsGenerating] = useState(false);
@@ -109,8 +93,8 @@ const ProfessionalTemplates = () => {
 
   const initializeForm = (templateId: string): TemplateForm => {
     const defaultForms: Record<string, Partial<TemplateForm>> = {
-      "product-launch": {
-        idea: "Showcase our revolutionary new AI-powered analytics platform",
+      marketing: {
+        idea: "Showcase our new AI-powered analytics platform",
         duration: "60",
         frameSize: "1080x1920",
         voice: "Professional Male",
@@ -133,15 +117,7 @@ const ProfessionalTemplates = () => {
         style: "Authentic",
         characters: "Happy customer, product in use"
       },
-      "course-intro": {
-        idea: "Welcome to Digital Marketing Mastery",
-        duration: "30",
-        frameSize: "1920x1080",
-        voice: "Enthusiastic Instructor",
-        style: "Dynamic Intro",
-        characters: "Course instructor, success examples"
-      },
-      tutorial: {
+      education: {
         idea: "How to use advanced Excel formulas",
         duration: "120",
         frameSize: "1920x1080", 
@@ -157,15 +133,15 @@ const ProfessionalTemplates = () => {
         style: "Animated Explainer",
         characters: "Narrator, visual metaphors"
       },
-      storytelling: {
-        idea: "The inspiring story of overcoming challenges",
-        duration: "180",
+      "course-intro": {
+        idea: "Welcome to Digital Marketing Mastery",
+        duration: "30",
         frameSize: "1920x1080",
-        voice: "Narrative Voice",
-        style: "Cinematic Story",
-        characters: "Protagonist, supporting characters"
+        voice: "Enthusiastic Instructor",
+        style: "Dynamic Intro",
+        characters: "Course instructor, success examples"
       },
-      comedy: {
+      entertainment: {
         idea: "Top 5 funny pet moments compilation",
         duration: "60",
         frameSize: "1080x1920",
@@ -173,13 +149,13 @@ const ProfessionalTemplates = () => {
         style: "Fun & Playful",
         characters: "Pets, owners, funny situations"
       },
-      lifestyle: {
-        idea: "A day in the life of a digital nomad",
-        duration: "90",
+      "social-media": {
+        idea: "Quick productivity hack for busy professionals",
+        duration: "15",
         frameSize: "1080x1920",
-        voice: "Personal Narrator",
-        style: "Lifestyle Vlog",
-        characters: "Content creator, everyday people"
+        voice: "Quick & Punchy",
+        style: "Social Media",
+        characters: "Relatable professional, before/after"
       }
     };
 
@@ -235,7 +211,7 @@ const ProfessionalTemplates = () => {
       setIsGenerating(false);
       toast({
         title: "Video Generated!",
-        description: `Your ${allTemplates.find(t => t.id === templateId)?.name} video is ready.`,
+        description: `Your ${templates.find(t => t.id === templateId)?.name} video is ready.`,
       });
       
       // Collapse the template after generation
@@ -295,37 +271,20 @@ const ProfessionalTemplates = () => {
           </p>
         </div>
 
-        {/* Category Tabs */}
-        <div className="flex justify-center mb-12">
-          <div className="flex bg-card/50 backdrop-blur-sm rounded-full p-1 border">
-            {Object.keys(templateCategories).map((category) => (
-              <button
-                key={category}
-                onClick={() => setActiveCategory(category)}
-                className={`px-8 py-3 rounded-full text-sm font-medium transition-all duration-300 ${
-                  activeCategory === category
-                    ? 'bg-primary text-primary-foreground shadow-lg'
-                    : 'text-muted-foreground hover:text-primary'
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Templates Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {templateCategories[activeCategory as keyof typeof templateCategories].map((template) => (
-            <Card key={template.id} className="glass overflow-hidden border-2 border-transparent hover:border-primary/20 transition-all duration-300">
+          {templates.map((template) => (
+            <Card key={template.id} className="glass overflow-hidden">
               <CardHeader className="pb-4">
-                <CardTitle className="text-xl mb-2">{template.name}</CardTitle>
-                <p className="text-sm text-muted-foreground mb-4">{template.description}</p>
-                
-                {/* Preview Text */}
-                <div className="bg-muted/30 rounded-lg p-4 mb-4">
-                  <p className="text-sm italic text-muted-foreground">"{template.previewText}"</p>
+                <div className="flex items-center space-x-3 mb-2">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-primary to-accent flex items-center justify-center">
+                    <template.icon className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">{template.name}</CardTitle>
+                    <p className="text-sm text-muted-foreground">{template.category}</p>
+                  </div>
                 </div>
+                <p className="text-sm text-muted-foreground">{template.description}</p>
               </CardHeader>
 
               <CardContent className="pt-0">
@@ -333,7 +292,7 @@ const ProfessionalTemplates = () => {
                   <CollapsibleTrigger asChild>
                     <Button 
                       variant="outline" 
-                      className="w-full mb-4 border-primary/30 hover:border-primary hover:bg-primary/5"
+                      className="w-full mb-4"
                       onClick={() => handleTemplateExpand(template.id)}
                     >
                       Use Template
