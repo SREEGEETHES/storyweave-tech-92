@@ -584,6 +584,9 @@ const Features = () => {
         </div>
       </main>
 
+      {/* Professional Templates Section */}
+      <ProfessionalTemplates />
+
       <Footer />
     </div>
   );

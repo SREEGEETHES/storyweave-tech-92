@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { 
   Wand2, 
   Users, 
@@ -86,9 +87,10 @@ const Features = () => {
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((feature, index) => (
-            <div 
+            <Link 
               key={index}
-              className="feature-card group animate-fade-in"
+              to="/features"
+              className="feature-card group animate-fade-in cursor-pointer"
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-r from-primary to-accent mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -107,7 +109,7 @@ const Features = () => {
               <p className="text-muted-foreground leading-relaxed">
                 {feature.description}
               </p>
-            </div>
+            </Link>
           ))}
         </div>
 
@@ -120,9 +122,9 @@ const Features = () => {
             <p className="text-muted-foreground mb-6">
               Join thousands of creators who are already making stunning videos with AI
             </p>
-            <button className="cta-primary">
+            <Link to="/features" className="cta-primary">
               Explore All Features
-            </button>
+            </Link>
           </div>
         </div>
       </div>

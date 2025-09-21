@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Check, Crown, Zap, Building } from "lucide-react";
 
 const PricingPreview = () => {
+  const [isYearly, setIsYearly] = useState(false);
+  
   const plans = [
     {
       name: "Free",
@@ -24,7 +27,7 @@ const PricingPreview = () => {
     {
       name: "Pro",
       icon: Crown,
-      price: "$29",
+      price: isYearly ? "$19" : "$29",
       period: "month",
       description: "Everything you need for professional video creation",
       features: [
@@ -44,7 +47,7 @@ const PricingPreview = () => {
     {
       name: "Enterprise",
       icon: Building,
-      price: "$199",
+      price: isYearly ? "$159" : "$199",
       period: "month",
       description: "Advanced features for teams and businesses",
       features: [
@@ -84,17 +87,29 @@ const PricingPreview = () => {
           </p>
 
           {/* Billing Toggle */}
-          <div className="flex items-center justify-center space-x-4 mb-12">
-            <span className="text-muted-foreground">Monthly</span>
-            <div className="glass rounded-full p-1">
-              <button className="px-6 py-2 rounded-full bg-primary text-primary-foreground text-sm font-medium">
+          <div className="flex items-center justify-center mb-12">
+            <div className="glass rounded-full p-1 flex">
+              <button 
+                onClick={() => setIsYearly(false)}
+                className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+                  !isYearly 
+                    ? 'bg-primary text-primary-foreground shadow-sm' 
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
                 Monthly
               </button>
-              <button className="px-6 py-2 rounded-full text-muted-foreground text-sm font-medium hover:text-foreground transition-colors">
+              <button 
+                onClick={() => setIsYearly(true)}
+                className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+                  isYearly 
+                    ? 'bg-primary text-primary-foreground shadow-sm' 
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
                 Yearly (Save 20%)
               </button>
             </div>
-            <span className="text-muted-foreground">Yearly</span>
           </div>
         </div>
 
