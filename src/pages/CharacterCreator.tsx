@@ -7,6 +7,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
@@ -14,11 +25,9 @@ import { useToast } from "@/hooks/use-toast";
 const CharacterCreator = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [characterName, setCharacterName] = useState("");
   const [characterDescription, setCharacterDescription] = useState("");
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedCharacter, setGeneratedCharacter] = useState<any>(null);
   
@@ -35,17 +44,6 @@ const CharacterCreator = () => {
   const [build, setBuild] = useState("");
   const [height, setHeight] = useState("");
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setUploadedImage(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const handleGenerate = async () => {
     if (!characterName.trim()) {
       toast({
@@ -60,12 +58,11 @@ const CharacterCreator = () => {
     
     // Simulate AI generation process
     setTimeout(() => {
-      const mockCharacter = {
-        id: Date.now().toString(),
-        name: characterName,
-        description: characterDescription,
-        image: uploadedImage,
-        parameters: {
+        const mockCharacter = {
+          id: Date.now().toString(),
+          name: characterName,
+          description: characterDescription,
+          parameters: {
           clothing,
           distinguishingCharacteristics,
           hairColor,
