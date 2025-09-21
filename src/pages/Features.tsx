@@ -536,9 +536,6 @@ const Features = () => {
             </Card>
           </section>
 
-          {/* Professional Templates Section */}
-          <ProfessionalTemplates />
-
           {/* 5. Social Media Export */}
           <section id="social-export" className="py-16">
             <div className="text-center mb-12">
