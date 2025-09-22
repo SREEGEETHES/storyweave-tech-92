@@ -186,8 +186,7 @@ const Features = () => {
     { icon: Scissors, name: "Trim & Cut", description: "Precise video trimming" },
     { icon: Copy, name: "Merge Videos", description: "Combine multiple clips" },
     { icon: Layers, name: "Add Overlays", description: "Text, graphics, effects" },
-    { icon: Type, name: "Captions", description: "Auto-generated subtitles" },
-    { icon: RotateCcw, name: "Mirror Effect", description: "Flip and rotate videos" }
+    { icon: Type, name: "Captions", description: "Auto-generated subtitles" }
   ];
 
   const exportPlatforms = [
