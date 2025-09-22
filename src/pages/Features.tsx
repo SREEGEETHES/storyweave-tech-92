@@ -258,6 +258,13 @@ const Features = () => {
                       />
                     </div>
                     
+                    <div className="flex justify-end">
+                      <Button variant="outline" className="gap-2">
+                        <Edit3 className="w-4 h-4" />
+                        Fine Tune
+                      </Button>
+                    </div>
+                    
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label>Duration</Label>
