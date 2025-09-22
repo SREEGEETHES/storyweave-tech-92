@@ -34,18 +34,18 @@ const NavigationDropdown = ({ label, items, currentPath }: NavigationDropdownPro
       </Link>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-64 glass rounded-lg shadow-lg border border-border/20 z-50">
+        <div className="absolute top-full left-0 mt-2 w-64 bg-black/80 backdrop-blur-[5px] rounded-lg shadow-lg border border-border/20 z-50">
           <div className="py-2">
             {items.map((item, index) => (
               <Link
                 key={index}
                 to={item.href}
-                className="block px-4 py-3 text-sm text-foreground/80 hover:text-primary hover:bg-accent/50 transition-colors"
+                className="block px-4 py-3 text-sm text-white hover:text-primary hover:bg-white/10 transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 <div className="font-medium">{item.label}</div>
                 {item.description && (
-                  <div className="text-xs text-muted-foreground mt-1">{item.description}</div>
+                  <div className="text-xs text-white/70 mt-1">{item.description}</div>
                 )}
               </Link>
             ))}

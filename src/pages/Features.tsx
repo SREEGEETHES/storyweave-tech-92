@@ -24,6 +24,8 @@ import {
   Instagram,
   Facebook,
   Twitter,
+  Archive,
+  Film,
   Plus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -186,7 +188,9 @@ const Features = () => {
     { icon: Scissors, name: "Trim & Cut", description: "Precise video trimming" },
     { icon: Copy, name: "Merge Videos", description: "Combine multiple clips" },
     { icon: Layers, name: "Add Overlays", description: "Text, graphics, effects" },
-    { icon: Type, name: "Captions", description: "Auto-generated subtitles" }
+    { icon: Type, name: "Captions", description: "Auto-generated subtitles" },
+    { icon: Archive, name: "Stock Library", description: "AI generated stock footage" },
+    { icon: Film, name: "Script B-Roll", description: "Generate or choose never-before-seen B-roll that matches your script" }
   ];
 
   const exportPlatforms = [
@@ -496,7 +500,11 @@ const Features = () => {
                   <p className="text-muted-foreground mb-4">
                     Upload your videos and start editing with our intuitive interface
                   </p>
-                  <Button>Launch Editor</Button>
+                  <Button asChild>
+                    <a href="https://github.com/designcombo/react-video-editor" target="_blank" rel="noopener noreferrer">
+                      Launch Editor
+                    </a>
+                  </Button>
                 </div>
               </CardContent>
             </Card>
