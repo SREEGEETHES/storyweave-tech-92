@@ -452,48 +452,8 @@ const Features = () => {
             <CharactersList />
           </section>
 
-          {/* 3. Script Templates */}
-          <section id="script-templates" className="py-16">
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center glass rounded-full px-6 py-2 mb-6">
-                <FileText className="w-4 h-4 text-primary mr-2" />
-                <span className="text-sm font-medium">Script Templates</span>
-              </div>
-              <h2 className="text-4xl font-bold mb-4">Professional Script Templates</h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Industry-specific templates to kickstart your video content creation
-              </p>
-            </div>
-
-            <Tabs defaultValue="marketing" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 mb-8">
-                <TabsTrigger value="marketing">Marketing</TabsTrigger>
-                <TabsTrigger value="education">Education</TabsTrigger>
-                <TabsTrigger value="entertainment">Entertainment</TabsTrigger>
-              </TabsList>
-              
-              {scriptTemplates.map((category) => (
-                <TabsContent key={category.category.toLowerCase()} value={category.category.toLowerCase()}>
-                  <div className="grid md:grid-cols-3 gap-6">
-                    {category.templates.map((template, index) => (
-                      <Card key={index} className="glass hover:scale-105 transition-transform">
-                        <CardHeader>
-                          <CardTitle className="text-lg">{template.name}</CardTitle>
-                          <CardDescription>{template.description}</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="bg-muted p-4 rounded-lg mb-4">
-                            <p className="text-sm italic">"{template.example}"</p>
-                          </div>
-                          <Button variant="outline" className="w-full">Use Template</Button>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </TabsContent>
-              ))}
-            </Tabs>
-          </section>
+          {/* Professional Templates Section */}
+          <ProfessionalTemplates />
 
           {/* 4. Video Editing */}
           <section id="video-editing" className="py-16">
@@ -580,9 +540,6 @@ const Features = () => {
           </section>
         </div>
       </main>
-
-      {/* Professional Templates Section */}
-      <ProfessionalTemplates />
 
       <Footer />
     </div>

@@ -14,8 +14,11 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Nunito', 'system-ui', 'sans-serif'],
         rounded: ['Nunito', 'system-ui', 'sans-serif'],
+      },
+      fontWeight: {
+        'default': '700',
       },
       colors: {
         border: "hsl(var(--border))",
