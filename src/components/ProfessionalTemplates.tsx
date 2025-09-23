@@ -230,17 +230,46 @@ const ProfessionalTemplates = () => {
 
     setIsGenerating(true);
     
-    // Simulate video generation
-    setTimeout(() => {
-      setIsGenerating(false);
+    try {
+      const webhookData = {
+        templateId: templateId,
+        templateName: allTemplates.find(t => t.id === templateId)?.name,
+        idea: form.idea.trim(),
+        duration: form.duration,
+        frameSize: form.frameSize,
+        voice: form.voice,
+        style: form.style,
+        characters: form.characters,
+        timestamp: new Date().toISOString(),
+        source: "CinemaForge AI Professional Templates"
+      };
+
+      const response = await fetch("http://localhost:5678/webhook-test/c43b0c47-38b1-4a10-a10b-a8fa140246b9", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        mode: "no-cors",
+        body: JSON.stringify(webhookData),
+      });
+
       toast({
         title: "Video Generated!",
-        description: `Your ${allTemplates.find(t => t.id === templateId)?.name} video is ready.`,
+        description: `Your ${allTemplates.find(t => t.id === templateId)?.name} video generation has been started.`,
       });
       
       // Collapse the template after generation
       setExpandedTemplate(null);
-    }, 3000);
+    } catch (error) {
+      console.error("Error sending to webhook:", error);
+      toast({
+        title: "Error",
+        description: "Failed to start video generation. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const voiceOptions = [

@@ -46,9 +46,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProfessionalTemplates from "@/components/ProfessionalTemplates";
+import StyleDetailsModal from "@/components/StyleDetailsModal";
 
 const CharactersList = () => {
   const [savedCharacters, setSavedCharacters] = useState([]);
@@ -134,12 +143,101 @@ const Features = () => {
   const [selectedVoice, setSelectedVoice] = useState("");
   const [selectedStyle, setSelectedStyle] = useState("realistic");
   const [myStyles, setMyStyles] = useState([]);
+  const [videoIdea, setVideoIdea] = useState("");
+  const [duration, setDuration] = useState("");
+  const [frameSize, setFrameSize] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [selectedStyleDetails, setSelectedStyleDetails] = useState(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Load saved styles from localStorage
     const savedStyles = JSON.parse(localStorage.getItem('myStyles') || '[]');
     setMyStyles(savedStyles);
+    
+    // Load persisted form data
+    const savedFormData = JSON.parse(localStorage.getItem('videoFormData') || '{}');
+    if (savedFormData.videoIdea) setVideoIdea(savedFormData.videoIdea);
+    if (savedFormData.duration) setDuration(savedFormData.duration);
+    if (savedFormData.frameSize) setFrameSize(savedFormData.frameSize);
+    if (savedFormData.selectedVoice) setSelectedVoice(savedFormData.selectedVoice);
+    if (savedFormData.selectedStyle) setSelectedStyle(savedFormData.selectedStyle);
   }, []);
+
+  // Auto-save form data to prevent loss on refresh
+  useEffect(() => {
+    const formData = {
+      videoIdea,
+      duration,
+      frameSize,
+      selectedVoice,
+      selectedStyle
+    };
+    localStorage.setItem('videoFormData', JSON.stringify(formData));
+  }, [videoIdea, duration, frameSize, selectedVoice, selectedStyle]);
+
+  const handleGenerateVideo = async () => {
+    if (!videoIdea.trim()) {
+      toast({
+        title: "Error",
+        description: "Please describe your video idea",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!duration || !frameSize || !selectedVoice) {
+      toast({
+        title: "Error", 
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+
+    try {
+      const webhookData = {
+        idea: videoIdea.trim(),
+        duration: duration,
+        frameSize: frameSize,
+        voice: selectedVoice,
+        style: selectedStyle,
+        styleDetails: selectedStyleDetails,
+        timestamp: new Date().toISOString(),
+        source: "CinemaForge AI Features Page"
+      };
+
+      const response = await fetch("http://localhost:5678/webhook-test/c43b0c47-38b1-4a10-a10b-a8fa140246b9", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        mode: "no-cors",
+        body: JSON.stringify(webhookData),
+      });
+
+      toast({
+        title: "Video Generation Started",
+        description: "Your video is being generated with all parameters!",
+      });
+      
+    } catch (error) {
+      console.error("Error sending to webhook:", error);
+      toast({
+        title: "Error",
+        description: "Failed to start video generation. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleStyleDoubleClick = (style: any) => {
+    setSelectedStyleDetails(style);
+  };
 
   const videoStyles = [
     { id: "realistic", name: "Realistic", icon: Video, description: "Photorealistic human-like videos" },
@@ -258,6 +356,8 @@ const Features = () => {
                         id="idea"
                         placeholder="A product demonstration showing our new smartphone..."
                         className="min-h-[100px]"
+                        value={videoIdea}
+                        onChange={(e) => setVideoIdea(e.target.value)}
                       />
                     </div>
                     
@@ -271,7 +371,7 @@ const Features = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label>Duration</Label>
-                        <Select>
+                        <Select value={duration} onValueChange={setDuration}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select duration" />
                           </SelectTrigger>
@@ -286,7 +386,7 @@ const Features = () => {
                       
                       <div>
                         <Label>Frame Size</Label>
-                        <Select>
+                        <Select value={frameSize} onValueChange={setFrameSize}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select size" />
                           </SelectTrigger>
@@ -320,6 +420,27 @@ const Features = () => {
                         </Button>
                       )}
                     </div>
+
+                    <div className="mt-6">
+                      <Button 
+                        onClick={handleGenerateVideo}
+                        disabled={isGenerating || !videoIdea.trim()}
+                        className="w-full cta-primary"
+                        size="lg"
+                      >
+                        {isGenerating ? (
+                          <>
+                            <Wand2 className="w-4 h-4 mr-2 animate-pulse" />
+                            Generating Video...
+                          </>
+                        ) : (
+                          <>
+                            <Video className="w-4 h-4 mr-2" />
+                            Generate Video
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
@@ -341,6 +462,7 @@ const Features = () => {
                             selectedStyle === style.id ? 'ring-2 ring-primary' : ''
                           }`}
                           onClick={() => setSelectedStyle(style.id)}
+                          onDoubleClick={() => handleStyleDoubleClick(style)}
                         >
                           <CardContent className="p-6 text-center relative">
                             <AlertDialog>
@@ -380,11 +502,27 @@ const Features = () => {
                               <Palette className="w-6 h-6 text-white" />
                             </div>
                             <h4 className="font-semibold mb-2">{style.name}</h4>
-                            <p className="text-sm text-muted-foreground">{style.description || "Custom style"}</p>
+                            <p className="text-sm text-muted-foreground line-clamp-1">
+                              {style.description ? 
+                                (style.description.length > 50 ? 
+                                  `${style.description.substring(0, 50)}...` : 
+                                  style.description
+                                ) : 
+                                "Custom style"
+                              }
+                            </p>
+                            <p className="text-xs text-primary mt-2">Double-click to view details</p>
                           </CardContent>
                         </Card>
                       ))}
                     </div>
+
+                    {/* Style Details Modal */}
+                    <StyleDetailsModal 
+                      style={selectedStyleDetails}
+                      isOpen={!!selectedStyleDetails}
+                      onClose={() => setSelectedStyleDetails(null)}
+                    />
                   </div>
                 )}
                 

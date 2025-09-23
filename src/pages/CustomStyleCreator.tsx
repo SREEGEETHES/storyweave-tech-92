@@ -70,13 +70,29 @@ const CustomStyleCreator = () => {
       id: Date.now().toString(),
       name: formData.name,
       description: formData.description,
+      referenceImage: formData.referenceImage,
       createdAt: new Date().toISOString()
     };
     savedStyles.push(newStyle);
     localStorage.setItem('myStyles', JSON.stringify(savedStyles));
     
+    // Also save the image data for persistence
+    if (formData.referenceImage) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const imageData = {
+          id: newStyle.id,
+          data: reader.result
+        };
+        const savedImages = JSON.parse(localStorage.getItem('styleImages') || '[]');
+        savedImages.push(imageData);
+        localStorage.setItem('styleImages', JSON.stringify(savedImages));
+      };
+      reader.readAsDataURL(formData.referenceImage);
+    }
+    
     toast.success("Style saved to My Styles!");
-    navigate('/features#scripts');
+    navigate('/features#idea-to-video');
   };
 
   if (generatedStyle) {
@@ -204,7 +220,7 @@ const CustomStyleCreator = () => {
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={() => navigate('/features#scripts')}
+              onClick={() => navigate('/features#idea-to-video')}
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
