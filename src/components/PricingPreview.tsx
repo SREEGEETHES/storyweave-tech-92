@@ -27,7 +27,7 @@ const PricingPreview = () => {
     {
       name: "Pro",
       icon: Crown,
-      price: isYearly ? "$19" : "$29",
+      price: "$29",
       period: "month",
       description: "Everything you need for professional video creation",
       features: [
@@ -47,7 +47,7 @@ const PricingPreview = () => {
     {
       name: "Enterprise",
       icon: Building,
-      price: isYearly ? "$159" : "$199",
+      price: "$199",
       period: "month",
       description: "Advanced features for teams and businesses",
       features: [
@@ -81,36 +81,10 @@ const PricingPreview = () => {
             <span className="block">Journey</span>
           </h2>
           
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-16">
             Start free and scale as you grow. All plans include our core AI video generation 
             technology with no hidden fees.
           </p>
-
-          {/* Billing Toggle */}
-          <div className="flex items-center justify-center mb-12">
-            <div className="glass rounded-full p-1 flex">
-              <button 
-                onClick={() => setIsYearly(false)}
-                className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
-                  !isYearly 
-                    ? 'bg-primary text-primary-foreground shadow-sm' 
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                Monthly
-              </button>
-              <button 
-                onClick={() => setIsYearly(true)}
-                className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
-                  isYearly 
-                    ? 'bg-primary text-primary-foreground shadow-sm' 
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                Yearly (Save 20%)
-              </button>
-            </div>
-          </div>
         </div>
 
         {/* Pricing Cards */}

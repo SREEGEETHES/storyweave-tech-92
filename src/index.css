@@ -6,36 +6,36 @@
 
 @layer base {
   :root {
-    /* Cosmic dark theme - Dark blue to violet gradient */
-    --background: 240 100% 4%;
-    --foreground: 210 20% 98%;
+    /* Clean white theme */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
 
-    --card: 245 100% 7%;
-    --card-foreground: 210 20% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
 
-    --popover: 245 100% 7%;
-    --popover-foreground: 210 20% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
 
     /* Neon cyan primary palette */
     --primary: 180 100% 50%;
-    --primary-foreground: 240 100% 4%;
+    --primary-foreground: 0 0% 100%;
     --primary-hover: 180 100% 60%;
 
     /* Pink accent colors */
-    --secondary: 240 50% 12%;
-    --secondary-foreground: 210 20% 98%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 0%;
 
     --accent: 320 100% 70%;
-    --accent-foreground: 210 20% 98%;
+    --accent-foreground: 0 0% 100%;
 
-    --muted: 220 30% 15%;
-    --muted-foreground: 220 15% 65%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 40%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 20% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 220 30% 15%;
-    --input: 220 30% 15%;
+    --border: 0 0% 90%;
+    --input: 0 0% 96%;
     --ring: 180 100% 50%;
 
     --radius: 0.75rem;
