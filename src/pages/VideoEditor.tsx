@@ -190,7 +190,7 @@ const VideoEditor = () => {
                   </div>
                   
                   {/* Video Preview */}
-                  <div className="flex-1 bg-black/20 rounded-lg flex items-center justify-center mb-4">
+                  <div className="flex-1 bg-gray-900 rounded-lg flex items-center justify-center mb-4">
                     <div className="text-center">
                       <Video className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                       <p className="text-muted-foreground">Video Preview</p>

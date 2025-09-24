@@ -101,7 +101,14 @@ const Header = () => {
             </Button>
             <Button 
               className="cta-primary"
-              onClick={() => navigate('/signup')}
+              onClick={() => {
+                const isLoggedIn = false; // Replace with actual auth state
+                if (!isLoggedIn) {
+                  navigate('/signup');
+                } else {
+                  navigate('/payment-portal');
+                }
+              }}
             >
               Start Free Trial
             </Button>
@@ -139,7 +146,14 @@ const Header = () => {
                 </Button>
                 <Button 
                   className="cta-primary justify-start"
-                  onClick={() => navigate('/signup')}
+                  onClick={() => {
+                    const isLoggedIn = false; // Replace with actual auth state
+                    if (!isLoggedIn) {
+                      navigate('/signup');
+                    } else {
+                      navigate('/payment-portal');
+                    }
+                  }}
                 >
                   Start Free Trial
                 </Button>

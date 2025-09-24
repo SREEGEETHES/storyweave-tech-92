@@ -683,7 +683,17 @@ const Features = () => {
                   <p className="text-muted-foreground mb-6">
                     Start creating professional videos with our comprehensive feature set
                   </p>
-                  <Button className="cta-primary">
+                  <Button 
+                    className="cta-primary"
+                    onClick={() => {
+                      const isLoggedIn = false; // Replace with actual auth state
+                      if (!isLoggedIn) {
+                        navigate('/signup');
+                      } else {
+                        navigate('/payment-portal');
+                      }
+                    }}
+                  >
                     Start Free Trial
                   </Button>
                 </CardContent>

@@ -39,7 +39,7 @@ const Hero = () => {
         >
           <source src={heroVideo} type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/90" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/20 to-background/60" />
       </div>
 
       {/* Animated background elements */}

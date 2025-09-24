@@ -173,16 +173,78 @@ const CharacterCreator = () => {
                     />
                   </div>
 
-                  <div>
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      value={characterDescription}
-                      onChange={(e) => setCharacterDescription(e.target.value)}
-                      placeholder="Describe the character"
-                      className="min-h-[100px]"
-                    />
+                <div>
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={characterDescription}
+                    onChange={(e) => setCharacterDescription(e.target.value)}
+                    placeholder="Describe the character"
+                    className="min-h-[100px]"
+                  />
+                {/* Upload Reference Image */}
+                <div>
+                  <Label htmlFor="reference-upload">Reference Image (Optional)</Label>
+                  <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed border-border rounded-lg hover:border-primary/50 transition-colors">
+                    <div className="space-y-1 text-center">
+                      <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
+                      <div className="flex text-sm text-muted-foreground">
+                        <label
+                          htmlFor="reference-upload"
+                          className="relative cursor-pointer bg-background rounded-md font-medium text-primary hover:text-primary/80"
+                        >
+                          <span>Upload a reference image</span>
+                          <input id="reference-upload" name="reference-upload" type="file" className="sr-only" accept="image/*" />
+                        </label>
+                        <p className="pl-1">or drag and drop</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 10MB</p>
+                    </div>
                   </div>
+                </div>
+
+                {/* Upload Reference Image */}
+                <div>
+                  <Label htmlFor="reference-upload">Reference Image (Optional)</Label>
+                  <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed border-border rounded-lg hover:border-primary/50 transition-colors">
+                    <div className="space-y-1 text-center">
+                      <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
+                      <div className="flex text-sm text-muted-foreground">
+                        <label
+                          htmlFor="reference-upload"
+                          className="relative cursor-pointer bg-background rounded-md font-medium text-primary hover:text-primary/80"
+                        >
+                          <span>Upload a reference image</span>
+                          <input id="reference-upload" name="reference-upload" type="file" className="sr-only" accept="image/*" />
+                        </label>
+                        <p className="pl-1">or drag and drop</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 10MB</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+                {/* Upload Reference Image */}
+                <div>
+                  <Label htmlFor="reference-upload">Reference Image (Optional)</Label>
+                  <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed border-border rounded-lg hover:border-primary/50 transition-colors">
+                    <div className="space-y-1 text-center">
+                      <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
+                      <div className="flex text-sm text-muted-foreground">
+                        <label
+                          htmlFor="reference-upload"
+                          className="relative cursor-pointer bg-background rounded-md font-medium text-primary hover:text-primary/80"
+                        >
+                          <span>Upload a reference image</span>
+                          <input id="reference-upload" name="reference-upload" type="file" className="sr-only" accept="image/*" />
+                        </label>
+                        <p className="pl-1">or drag and drop</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 10MB</p>
+                    </div>
+                  </div>
+                </div>
                 </div>
 
                 {/* Character Parameters */}

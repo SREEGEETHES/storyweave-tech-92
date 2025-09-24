@@ -11,10 +11,13 @@ import {
   Twitter,
   Github
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const About = () => {
+  const navigate = useNavigate();
+  
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -192,7 +195,17 @@ const About = () => {
                     Experience the future of video creation with our free trial. 
                     No credit card required.
                   </p>
-                  <Button className="cta-primary w-full mb-4">
+                  <Button 
+                    className="cta-primary"
+                    onClick={() => {
+                      const isLoggedIn = false; // Replace with actual auth state
+                      if (!isLoggedIn) {
+                        navigate('/signup');
+                      } else {
+                        navigate('/payment-portal');
+                      }
+                    }}
+                  >
                     Start Free Trial
                   </Button>
                   <Button variant="ghost" className="w-full">

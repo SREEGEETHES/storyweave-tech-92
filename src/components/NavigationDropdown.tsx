@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { Link } from "react-router-dom";
 
 interface DropdownItem {
   label: string;
@@ -48,20 +47,38 @@ const NavigationDropdown = ({ label, items, currentPath }: NavigationDropdownPro
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-64 bg-black rounded-lg shadow-lg border border-gray-700 z-50">
+        <div className="absolute top-full left-0 mt-2 w-64 bg-background border border-border rounded-lg shadow-lg z-50">
           <div className="py-2">
             {items.map((item, index) => (
-              <Link
+              <a
                 key={index}
-                to={item.href}
-                className="block px-4 py-3 text-sm text-white hover:text-primary hover:bg-gray-800 transition-colors"
-                onClick={() => setIsOpen(false)}
+                href={item.href}
+                className="block px-4 py-3 text-sm text-foreground hover:text-accent hover:bg-secondary transition-colors"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsOpen(false);
+                  
+                  // Handle section scrolling
+                  if (item.href.includes('#')) {
+                    const [path, section] = item.href.split('#');
+                    if (window.location.pathname === path || path === '') {
+                      const element = document.getElementById(section);
+                      if (element) {
+                        element.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    } else {
+                      window.location.href = item.href;
+                    }
+                  } else {
+                    window.location.href = item.href;
+                  }
+                }}
               >
                 <div className="font-medium">{item.label}</div>
                 {item.description && (
-                  <div className="text-xs text-gray-300 mt-1">{item.description}</div>
+                  <div className="text-xs text-muted-foreground mt-1">{item.description}</div>
                 )}
-              </Link>
+              </a>
             ))}
           </div>
         </div>
