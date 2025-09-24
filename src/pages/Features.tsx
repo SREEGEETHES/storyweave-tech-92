@@ -209,7 +209,7 @@ const Features = () => {
         source: "CinemaForge AI Features Page"
       };
 
-      const response = await fetch("http://localhost:5678/webhook-test/c43b0c47-38b1-4a10-a10b-a8fa140246b9", {
+      const response = await fetch("http://localhost:5678/webhook-test/webhook-test/c43b0c47-38b1-4a10-a10b-a8fa140246b9", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -553,10 +553,6 @@ const Features = () => {
                     </Card>
                   ))}
                 </div>
-                
-                <Button className="w-full mt-6 cta-primary">
-                  Generate Video
-                </Button>
               </div>
             </div>
           </section>
