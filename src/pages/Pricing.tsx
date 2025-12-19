@@ -2,8 +2,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Check, Crown, Zap, Building, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 
 const Pricing = () => {
   const [isYearly, setIsYearly] = useState(false);
@@ -77,13 +75,12 @@ const Pricing = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      
+
       <main className="pt-20">
         {/* Back Navigation */}
         <div className="container mx-auto px-4 pt-8">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             onClick={() => navigate(-1)}
             className="mb-8"
           >
@@ -100,27 +97,26 @@ const Pricing = () => {
                 <Crown className="w-4 h-4 text-feature-accent mr-2" />
                 <span className="text-sm font-medium">Pricing Plans</span>
               </div>
-              
+
               <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 Choose Your Creative
                 <span className="block">Journey</span>
               </h1>
-              
+
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-                Start free and scale as you grow. All plans include our core AI video generation 
+                Start free and scale as you grow. All plans include our core AI video generation
                 technology with no hidden fees.
               </p>
 
               {/* Billing Toggle */}
               <div className="flex items-center justify-center space-x-4 mb-12">
                 <span className={`text-sm ${!isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>Monthly</span>
-                <button 
+                <button
                   onClick={() => setIsYearly(!isYearly)}
                   className="relative glass rounded-full p-1 w-16 h-8"
                 >
-                  <div className={`absolute top-1 w-6 h-6 bg-primary rounded-full transition-transform ${
-                    isYearly ? 'translate-x-8' : 'translate-x-1'
-                  }`} />
+                  <div className={`absolute top-1 w-6 h-6 bg-primary rounded-full transition-transform ${isYearly ? 'translate-x-8' : 'translate-x-1'
+                    }`} />
                 </button>
                 <span className={`text-sm ${isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>
                   Yearly <span className="text-feature-accent">(Save 20%)</span>
@@ -144,10 +140,10 @@ const Pricing = () => {
                     <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-r from-primary to-accent mb-4 mx-auto">
                       <plan.icon className="w-8 h-8 text-white" />
                     </div>
-                    
+
                     <h3 className="text-2xl font-bold text-foreground mb-2">{plan.name}</h3>
                     <p className="text-muted-foreground text-sm mb-4">{plan.description}</p>
-                    
+
                     <div className="mb-6">
                       <span className="text-4xl font-bold text-foreground">
                         ${isYearly ? plan.yearlyPrice : plan.monthlyPrice}
@@ -170,7 +166,7 @@ const Pricing = () => {
                     ))}
                   </ul>
 
-                  <Button 
+                  <Button
                     className={plan.popular ? "cta-primary w-full" : "cta-secondary w-full"}
                     onClick={() => handleSubscribe(plan.name)}
                   >
@@ -213,7 +209,7 @@ const Pricing = () => {
         </section>
       </main>
 
-      <Footer />
+
     </div>
   );
 };

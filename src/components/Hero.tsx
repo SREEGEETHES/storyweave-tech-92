@@ -2,17 +2,16 @@ import { Button } from "@/components/ui/button";
 import { Play, Sparkles, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useUser } from "@/contexts/UserContext";
 import heroVideo from "@/assets/hero-bg-video.mp4";
 
 const Hero = () => {
   const navigate = useNavigate();
+  const { user } = useUser();
   const [isYearly, setIsYearly] = useState(true);
-  
-  // Mock authentication state - in a real app this would come from your auth provider
-  const isLoggedIn = false; // Change this to test different states
-  
+
   const handleStartFree = () => {
-    if (!isLoggedIn) {
+    if (!user) {
       navigate('/signup', { state: { planType: 'free' } });
     } else {
       navigate('/payment-portal', { state: { planType: 'free' } });
@@ -20,7 +19,7 @@ const Hero = () => {
   };
 
   const handleStartProTrial = () => {
-    if (!isLoggedIn) {
+    if (!user) {
       navigate('/signup', { state: { planType: 'pro' } });
     } else {
       navigate('/payment-portal', { state: { planType: 'pro' } });
@@ -30,10 +29,10 @@ const Hero = () => {
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background with overlay */}
       <div className="absolute inset-0">
-        <video 
-          autoPlay 
-          loop 
-          muted 
+        <video
+          autoPlay
+          loop
+          muted
           playsInline
           className="absolute inset-0 w-full h-full object-cover"
         >
@@ -69,20 +68,19 @@ const Hero = () => {
 
           {/* Subtitle */}
           <p className="hero-subtitle mb-12 animate-fade-in delay-200 font-rounded">
-            Create viral-ready content for Shorts, Reels, and TikToks. Transform any idea into 
+            Create viral-ready content for Shorts, Reels, and TikToks. Transform any idea into
             engaging AI videos that captivate your audience and boost your social media presence.
           </p>
 
           {/* Pricing Toggle */}
           <div className="flex items-center justify-center space-x-4 mb-8 animate-fade-in delay-300">
             <span className={`text-muted-foreground ${!isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>Monthly</span>
-            <button 
+            <button
               onClick={() => setIsYearly(!isYearly)}
               className="relative glass rounded-full p-1 w-16 h-8"
             >
-              <div className={`absolute top-1 w-6 h-6 bg-primary rounded-full transition-transform ${
-                isYearly ? 'translate-x-8' : 'translate-x-1'
-              }`} />
+              <div className={`absolute top-1 w-6 h-6 bg-primary rounded-full transition-transform ${isYearly ? 'translate-x-8' : 'translate-x-1'
+                }`} />
             </button>
             <span className={`${isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>
               Yearly <span className="text-feature-accent">(Save 20%)</span>
@@ -91,14 +89,14 @@ const Hero = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 animate-fade-in delay-400">
-            <Button 
+            <Button
               className="cta-primary"
               onClick={handleStartFree}
             >
               Start Free
               <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <Button 
+            <Button
               className="cta-secondary"
               onClick={handleStartProTrial}
             >

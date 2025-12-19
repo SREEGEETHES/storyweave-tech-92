@@ -5,12 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Play, 
-  Pause, 
-  Square, 
-  Scissors, 
-  Download, 
+import {
+  Play,
+  Pause,
+  Square,
+  Scissors,
+  Download,
   Upload,
   Layers,
   Type,
@@ -26,7 +26,7 @@ import {
   Video
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import Header from "@/components/Header";
+
 
 const VideoEditor = () => {
   const navigate = useNavigate();
@@ -78,15 +78,15 @@ const VideoEditor = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      
+
+
       <main className="pt-20">
         <div className="container mx-auto px-4">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 onClick={() => navigate(-1)}
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -94,7 +94,7 @@ const VideoEditor = () => {
               </Button>
               <h1 className="text-2xl font-bold">Video Editor</h1>
             </div>
-            
+
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm">
                 <Undo className="h-4 w-4" />
@@ -140,7 +140,7 @@ const VideoEditor = () => {
                         <TabsTrigger value="video">Video</TabsTrigger>
                         <TabsTrigger value="audio">Audio</TabsTrigger>
                       </TabsList>
-                      
+
                       <TabsContent value="video" className="space-y-4 mt-4">
                         <div>
                           <Label className="text-sm">Brightness</Label>
@@ -155,16 +155,16 @@ const VideoEditor = () => {
                           <Slider defaultValue={[50]} max={100} step={1} className="mt-2" />
                         </div>
                       </TabsContent>
-                      
+
                       <TabsContent value="audio" className="space-y-4 mt-4">
                         <div>
                           <Label className="text-sm">Volume</Label>
-                          <Slider 
+                          <Slider
                             value={volume}
                             onValueChange={setVolume}
-                            max={100} 
-                            step={1} 
-                            className="mt-2" 
+                            max={100}
+                            step={1}
+                            className="mt-2"
                           />
                         </div>
                         <Button variant="outline" className="w-full">
@@ -188,7 +188,7 @@ const VideoEditor = () => {
                       <Maximize className="h-4 w-4" />
                     </Button>
                   </div>
-                  
+
                   {/* Video Preview */}
                   <div className="flex-1 bg-gray-900 rounded-lg flex items-center justify-center mb-4">
                     <div className="text-center">
@@ -199,7 +199,7 @@ const VideoEditor = () => {
                       </p>
                     </div>
                   </div>
-                  
+
                   {/* Video Controls */}
                   <div className="space-y-4">
                     <div className="flex items-center justify-center gap-4">
@@ -215,16 +215,16 @@ const VideoEditor = () => {
                       </Button>
                       <div className="flex items-center gap-2">
                         <Volume2 className="h-4 w-4" />
-                        <Slider 
+                        <Slider
                           value={volume}
                           onValueChange={setVolume}
-                          max={100} 
-                          step={1} 
-                          className="w-20" 
+                          max={100}
+                          step={1}
+                          className="w-20"
                         />
                       </div>
                     </div>
-                    
+
                     {/* Timeline Scrubber */}
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -249,22 +249,22 @@ const VideoEditor = () => {
               <Card className="glass h-full">
                 <CardContent className="p-4">
                   <h3 className="font-semibold mb-4">Media Library</h3>
-                  
+
                   <Tabs defaultValue="uploads" className="w-full">
                     <TabsList className="grid w-full grid-cols-2">
                       <TabsTrigger value="uploads">Uploads</TabsTrigger>
                       <TabsTrigger value="stock">Stock</TabsTrigger>
                     </TabsList>
-                    
+
                     <TabsContent value="uploads" className="space-y-4 mt-4">
                       <Button variant="outline" className="w-full">
                         <Upload className="h-4 w-4 mr-2" />
                         Upload Media
                       </Button>
-                      
+
                       <div className="grid grid-cols-2 gap-2">
                         {[1, 2, 3, 4].map((i) => (
-                          <div 
+                          <div
                             key={i}
                             className="aspect-video bg-gradient-to-r from-primary/20 to-accent/20 rounded border-2 border-dashed border-primary/30 flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors"
                           >
@@ -273,12 +273,12 @@ const VideoEditor = () => {
                         ))}
                       </div>
                     </TabsContent>
-                    
+
                     <TabsContent value="stock" className="space-y-4 mt-4">
                       <Input placeholder="Search stock media..." />
                       <div className="grid grid-cols-2 gap-2">
                         {[1, 2, 3, 4, 5, 6].map((i) => (
-                          <div 
+                          <div
                             key={i}
                             className="aspect-video bg-gradient-to-r from-primary to-accent rounded cursor-pointer hover:scale-105 transition-transform"
                           />
@@ -301,10 +301,9 @@ const VideoEditor = () => {
                     <div className="w-16 text-xs text-muted-foreground">
                       Track {clip.id + 1}
                     </div>
-                    <div 
-                      className={`h-8 rounded flex items-center px-2 text-xs font-medium text-white cursor-pointer hover:opacity-80 transition-opacity ${
-                        clip.type === 'video' ? 'bg-primary' : 'bg-accent'
-                      }`}
+                    <div
+                      className={`h-8 rounded flex items-center px-2 text-xs font-medium text-white cursor-pointer hover:opacity-80 transition-opacity ${clip.type === 'video' ? 'bg-primary' : 'bg-accent'
+                        }`}
                       style={{ width: `${((clip.end - clip.start) / duration) * 100}%` }}
                     >
                       {clip.name}

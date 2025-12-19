@@ -1,16 +1,3 @@
-import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, CreditCard, Smartphone, Building2, Wallet } from "lucide-react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-
-interface LocationState {
-  selectedPlan?: string;
-  planType?: 'free' | 'pro';
-}
-
 const PaymentPortal = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -64,8 +51,8 @@ const PaymentPortal = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      
+
+
       <main className="pt-20 pb-16">
         <div className="container mx-auto px-4 max-w-2xl">
           {/* Header */}
@@ -87,7 +74,7 @@ const PaymentPortal = () => {
                 {isFreePlan ? 'Start Free Account' : `Subscribe to ${planName} Plan`}
               </CardTitle>
               <p className="text-muted-foreground">
-                {isFreePlan 
+                {isFreePlan
                   ? 'Create your free account to start using VideoAI'
                   : 'Choose your preferred payment method to continue'
                 }
@@ -101,7 +88,7 @@ const PaymentPortal = () => {
                   <div>
                     <h3 className="font-semibold">{planName} Plan</h3>
                     <p className="text-sm text-muted-foreground">
-                      {isFreePlan 
+                      {isFreePlan
                         ? 'Free forever • 3 videos per month'
                         : 'Pro features • Unlimited videos • No watermark'
                       }
@@ -118,7 +105,7 @@ const PaymentPortal = () => {
 
               {/* Free Plan Button */}
               {isFreePlan ? (
-                <Button 
+                <Button
                   onClick={() => navigate('/dashboard')}
                   className="w-full cta-primary"
                 >
@@ -129,15 +116,14 @@ const PaymentPortal = () => {
                   {/* Payment Methods */}
                   <div className="space-y-3">
                     <h3 className="font-semibold">Select Payment Method</h3>
-                    
+
                     {paymentMethods.map((method) => (
-                      <Card 
-                        key={method.id} 
-                        className={`cursor-pointer transition-all hover:scale-105 ${
-                          selectedMethod === method.id 
-                            ? 'ring-2 ring-primary border-primary' 
-                            : 'hover:border-primary/50'
-                        }`}
+                      <Card
+                        key={method.id}
+                        className={`cursor-pointer transition-all hover:scale-105 ${selectedMethod === method.id
+                          ? 'ring-2 ring-primary border-primary'
+                          : 'hover:border-primary/50'
+                          }`}
                         onClick={() => handlePayment(method.id)}
                       >
                         <CardContent className="flex items-center space-x-4 p-4">
@@ -192,7 +178,7 @@ const PaymentPortal = () => {
         </div>
       </main>
 
-      <Footer />
+
     </div>
   );
 };
