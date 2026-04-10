@@ -13,8 +13,8 @@ while ($true) {
     if ((Get-Date).Hour -ge $StartH -and (Get-Date).Hour -lt $EndH) {
         Write-Host "🟢 $(Get-Date): Work Session Starting (45m)..." -ForegroundColor Green
         
-        # Trigger Claude Code autonomously
-        claude -p "Read task.md, pick the absolute next uncompleted task, implement it fully in code, update task.md to check it off, and then safely exit."
+        # Trigger Claude Code autonomously with -y (Auto-Approve all file writes)
+        claude -y -p "Read task.md, pick the absolute next uncompleted task, implement it fully in code, update task.md to check it off, and then safely exit."
         
         Write-Host "✅ Session Done. Saving to GitHub..." -ForegroundColor Yellow
         git add .
