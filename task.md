@@ -32,10 +32,10 @@
 - [x] Finalize the Frontend Progress UI (% bar to download link).
 
 ## 🌍 Sprint 5: Infrastructure & Deployment (Future-Proofing)
-- [ ] Write the **Docker** setup (`Dockerfile` & `docker-compose.yml`) for the backend/frontend.
-- [ ] Create the **Terraform** scripts to provision cloud infrastructure (VPC, Instances, Storage).
-- [ ] Write the **Kubernetes** manifests for scalable deployment of the AI processing nodes.
-- [ ] Setup standard **CI/CD pipeline** (GitHub Actions) for automatic testing and deployment.
+- [x] Write the **Docker** setup (`Dockerfile` & `docker-compose.yml`) for the backend/frontend.
+- [x] Create the **Terraform** scripts to provision cloud infrastructure (VPC, Instances, Storage).
+- [x] Write the **Kubernetes** manifests for scalable deployment of the AI processing nodes.
+- [x] Setup standard **CI/CD pipeline** (GitHub Actions) for automatic testing and deployment.
 
 ## 📱 Sprint 6: Social Media Auto-Publishing
 - [ ] Integrate **Postiz** core publishing logic (Oauth for TikTok, Shorts, Instagram).
