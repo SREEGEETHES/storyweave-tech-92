@@ -142,7 +142,7 @@ const About = () => {
                     </div>
                     <div>
                       <div className="font-semibold">Email</div>
-                      <div className="text-muted-foreground">hello@cinemaforge.ai</div>
+                      <div className="text-muted-foreground">hello@n4clips.ai</div>
                     </div>
                   </div>
 

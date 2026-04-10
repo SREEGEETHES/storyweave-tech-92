@@ -36,7 +36,7 @@ const templateCategories = {
       category: "Marketing"
     },
     {
-      id: "brand-story", 
+      id: "brand-story",
       name: "Brand Story",
       description: "Tell your company's journey",
       previewText: "It all started with a simple idea...",
@@ -53,7 +53,7 @@ const templateCategories = {
   Education: [
     {
       id: "course-intro",
-      name: "Course Intro", 
+      name: "Course Intro",
       description: "Welcome students to your course",
       previewText: "Welcome to the complete guide...",
       category: "Education"
@@ -144,7 +144,7 @@ const ProfessionalTemplates = () => {
       tutorial: {
         idea: "How to use advanced Excel formulas",
         duration: "120",
-        frameSize: "1920x1080", 
+        frameSize: "1920x1080",
         voice: "Clear Instructor",
         style: "Educational",
         characters: "Teacher, student examples"
@@ -229,7 +229,7 @@ const ProfessionalTemplates = () => {
     }
 
     setIsGenerating(true);
-    
+
     try {
       const webhookData = {
         templateId: templateId,
@@ -241,7 +241,7 @@ const ProfessionalTemplates = () => {
         style: form.style,
         characters: form.characters,
         timestamp: new Date().toISOString(),
-        source: "CinemaForge AI Professional Templates"
+        source: "N4 CLIPS Professional Templates"
       };
 
       const response = await fetch("http://localhost:5678/webhook-test/c43b0c47-38b1-4a10-a10b-a8fa140246b9", {
@@ -257,7 +257,7 @@ const ProfessionalTemplates = () => {
         title: "Video Generated!",
         description: `Your ${allTemplates.find(t => t.id === templateId)?.name} video generation has been started.`,
       });
-      
+
       // Collapse the template after generation
       setExpandedTemplate(null);
     } catch (error) {
@@ -274,7 +274,7 @@ const ProfessionalTemplates = () => {
 
   const voiceOptions = [
     "Professional Male",
-    "Professional Female", 
+    "Professional Female",
     "Warm Female",
     "Conversational Male",
     "Energetic Host",
@@ -288,7 +288,7 @@ const ProfessionalTemplates = () => {
     "Modern Corporate",
     "Cinematic",
     "Authentic",
-    "Educational", 
+    "Educational",
     "Animated Explainer",
     "Dynamic Intro",
     "Fun & Playful",
@@ -299,7 +299,7 @@ const ProfessionalTemplates = () => {
 
   const frameSizeOptions = [
     "1920x1080 (Landscape)",
-    "1080x1920 (Portrait)", 
+    "1080x1920 (Portrait)",
     "1080x1080 (Square)",
     "1280x720 (HD)"
   ];
@@ -312,14 +312,14 @@ const ProfessionalTemplates = () => {
             <Play className="w-4 h-4 text-feature-accent mr-2" />
             <span className="text-sm font-medium">Professional Templates</span>
           </div>
-          
+
           <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             Ready-to-Use
             <span className="block">Video Templates</span>
           </h2>
-          
+
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Choose from our collection of professional templates. Each template includes customizable 
+            Choose from our collection of professional templates. Each template includes customizable
             fields to match your specific needs and brand requirements.
           </p>
         </div>
@@ -331,11 +331,10 @@ const ProfessionalTemplates = () => {
               <button
                 key={category}
                 onClick={() => setActiveCategory(category)}
-                className={`px-8 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
-                  activeCategory === category
+                className={`px-8 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${activeCategory === category
                     ? 'bg-primary text-primary-foreground shadow-lg scale-105'
                     : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                }`}
+                  }`}
               >
                 {category}
               </button>
@@ -350,7 +349,7 @@ const ProfessionalTemplates = () => {
               <CardHeader className="pb-4 space-y-4">
                 <CardTitle className="text-2xl font-bold text-foreground">{template.name}</CardTitle>
                 <p className="text-muted-foreground text-sm leading-relaxed">{template.description}</p>
-                
+
                 {/* Preview Text */}
                 <div className="bg-muted/40 rounded-xl p-4 border border-border/20">
                   <p className="text-sm italic text-muted-foreground font-medium">"{template.previewText}"</p>
@@ -360,8 +359,8 @@ const ProfessionalTemplates = () => {
               <CardContent className="pt-0">
                 <Collapsible open={expandedTemplate === template.id}>
                   <CollapsibleTrigger asChild>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="w-full mb-4 bg-primary/5 border-primary/20 hover:border-primary hover:bg-primary/10 text-foreground font-medium rounded-xl h-12"
                       onClick={() => handleTemplateExpand(template.id)}
                     >
@@ -404,8 +403,8 @@ const ProfessionalTemplates = () => {
 
                           <div>
                             <Label htmlFor={`frameSize-${template.id}`} className="text-sm font-medium text-foreground mb-2 block">Frame Size</Label>
-                            <Select 
-                              value={templateForms[template.id].frameSize} 
+                            <Select
+                              value={templateForms[template.id].frameSize}
                               onValueChange={(value) => updateForm(template.id, 'frameSize', value)}
                             >
                               <SelectTrigger className="bg-background/50 border-border/50 focus:border-primary rounded-lg">
@@ -422,8 +421,8 @@ const ProfessionalTemplates = () => {
 
                         <div>
                           <Label htmlFor={`voice-${template.id}`} className="text-sm font-medium text-foreground mb-2 block">Voice</Label>
-                          <Select 
-                            value={templateForms[template.id].voice} 
+                          <Select
+                            value={templateForms[template.id].voice}
                             onValueChange={(value) => updateForm(template.id, 'voice', value)}
                           >
                             <SelectTrigger className="bg-background/50 border-border/50 focus:border-primary rounded-lg">
@@ -439,8 +438,8 @@ const ProfessionalTemplates = () => {
 
                         <div>
                           <Label htmlFor={`style-${template.id}`} className="text-sm font-medium text-foreground mb-2 block">Style</Label>
-                          <Select 
-                            value={templateForms[template.id].style} 
+                          <Select
+                            value={templateForms[template.id].style}
                             onValueChange={(value) => updateForm(template.id, 'style', value)}
                           >
                             <SelectTrigger className="bg-background/50 border-border/50 focus:border-primary rounded-lg">
@@ -465,7 +464,7 @@ const ProfessionalTemplates = () => {
                           />
                         </div>
 
-                        <Button 
+                        <Button
                           onClick={() => handleGenerateVideo(template.id)}
                           disabled={isGenerating}
                           className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl h-12 mt-6 shadow-lg shadow-primary/20"

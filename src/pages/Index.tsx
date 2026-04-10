@@ -49,7 +49,7 @@ const Index = () => {
         body: JSON.stringify({
           message: message.trim(),
           timestamp: new Date().toISOString(),
-          source: "CinemaForge AI Website"
+          source: "N4 CLIPS Website"
         }),
       });
 
@@ -84,44 +84,43 @@ const Index = () => {
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-16">
-                <div className="inline-flex items-center glass rounded-full px-6 py-2 mb-8 animate-glow">
+                <div className="inline-flex items-center glass rounded-full px-6 py-2 mb-8 animate-glow border border-primary/20">
                   <Video className="w-4 h-4 text-primary mr-2" />
-                  <span className="text-sm font-medium">About N4 Clips </span>
+                  <span className="text-sm font-medium bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">N4 CLIPS Enterprise </span>
                 </div>
 
-                <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  Revolutionizing Video Creation with AI
+                <h2 className="text-5xl md:text-7xl font-bold mb-8 tracking-tight">
+                  <span className="bg-gradient-to-r from-primary via-purple-400 to-accent bg-clip-text text-transparent">
+                    Create Viral Videos
+                  </span>
+                  <br />
+                  <span className="text-white">With AI Precision</span>
                 </h2>
 
-                <p className="text-xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
-                  We're on a mission to democratize cinematic video creation, making professional-quality
-                  content accessible to creators, businesses, and storytellers worldwide.
+                <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed font-light">
+                  Clone editing styles (like Zack D.), automate your faceless channel, and dominate social media algorithmically.
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-12 items-center mb-20">
-                <div>
-                  <h3 className="text-3xl font-bold mb-6 text-foreground">
-                    Our Story
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed mb-6">
-                    Founded in 2025, N4 Clips emerged from a simple observation: creating
-                    compelling video content was too complex, time-consuming, and expensive for
-                    most creators and businesses.
-                  </p>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Our team of AI researchers, filmmakers, and engineers came together with a
-                    vision to transform how stories are told through the power of artificial
-                    intelligence and cinematic creativity.
-                  </p>
+              {/* Bento Grid Features Preview */}
+              <div className="grid md:grid-cols-3 gap-6 mb-24 max-w-6xl mx-auto">
+                <div className="glass p-8 rounded-[2rem] border border-white/5 bg-gradient-to-br from-white/5 to-transparent hover:border-primary/30 transition-all group">
+                  <div className="h-12 w-12 rounded-2xl bg-primary/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <Award className="w-6 h-6 text-primary" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-2">Style Cloning</h3>
+                  <p className="text-muted-foreground">Upload any video, we extract the editing DNA.</p>
                 </div>
-                <div className="glass rounded-2xl p-8 text-center">
-                  <div className="text-4xl font-bold text-primary mb-2">2025</div>
-                  <div className="text-muted-foreground mb-4">Founded</div>
-                  <div className="text-2xl font-bold text-accent mb-2">50K+</div>
-                  <div className="text-muted-foreground mb-4">Videos Created</div>
-                  <div className="text-2xl font-bold text-feature-accent">5+</div>
-                  <div className="text-muted-foreground">Countries Served</div>
+
+                <div className="glass p-8 rounded-[2rem] border border-white/5 bg-gradient-to-br from-white/5 to-transparent hover:border-accent/30 transition-all group md:col-span-2 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 blur-[100px] rounded-full pointer-events-none" />
+                  <div className="relative z-10">
+                    <div className="h-12 w-12 rounded-2xl bg-accent/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                      <Globe className="w-6 h-6 text-accent" />
+                    </div>
+                    <h3 className="text-2xl font-bold mb-2">Auto-Pilot Mode</h3>
+                    <p className="text-muted-foreground">Schedule and post to YouTube, TikTok, and Instagram on autopilot.</p>
+                  </div>
                 </div>
               </div>
 

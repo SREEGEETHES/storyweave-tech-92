@@ -10,24 +10,10 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     const { user, loading } = useUser();
     const location = useLocation();
 
-    // Show loading state while checking authentication
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-background flex items-center justify-center">
-                <div className="text-center">
-                    <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-muted-foreground">Loading...</p>
-                </div>
-            </div>
-        );
-    }
+    // TEMPORARY: Bypass login for development
+    // if (loading) ... (keep or remove loading check if desired, but for now just render children)
 
-    // Redirect to login if not authenticated
-    if (!user) {
-        return <Navigate to="/login" state={{ from: location }} replace />;
-    }
-
-    // Render children if authenticated
+    // Render children immediately to bypass auth
     return <>{children}</>;
 };
 

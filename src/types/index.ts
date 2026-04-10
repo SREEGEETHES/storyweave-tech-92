@@ -34,3 +34,33 @@ export interface DashboardStats {
     charactersCreated: number;
     plan: string;
 }
+
+export interface VideoState {
+    id: string; // Ties back to VideoProject.id
+    global: {
+        fps: number;
+        durationInFrames: number;
+        width: number;
+        height: number;
+        backgroundColor?: string;
+    };
+    audio: {
+        voiceoverUrl?: string; // Qwen3-TTS audio
+        bgmUrl?: string; // ACE-Step 1.5 music
+        volumeBgm: number;
+    };
+    captions: {
+        text: string;
+        startFrame: number;
+        endFrame: number;
+    }[];
+    scenes: {
+        id: string;
+        startFrame: number;
+        durationInFrames: number;
+        transitionType?: 'fade' | 'slide' | 'none';
+        visualType: 'image' | 'video' | 'gif';
+        visualUrl: string; // Seedream image / Tenor GIF URL
+        kenBurnsEffect?: boolean;
+    }[];
+}

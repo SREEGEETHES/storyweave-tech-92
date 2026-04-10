@@ -26,6 +26,7 @@ import {
   Video
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { aiService } from "@/services/aiService";
 
 
 const VideoEditor = () => {
@@ -35,7 +36,23 @@ const VideoEditor = () => {
   const [duration] = useState(120); // 2 minutes
   const [volume, setVolume] = useState([80]);
   const [selectedTool, setSelectedTool] = useState("select");
+  const [generationType, setGenerationType] = useState<'short' | 'long'>('short');
+  const [isGenerating, setIsGenerating] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  const handleGenerateVideo = async () => {
+    setIsGenerating(true);
+    try {
+      console.log("Initiating AI Generation..."); // Add log for visibility
+      const result = await aiService.generateVideo("Current Project Context", generationType);
+      console.log("Final Video Result:", result);
+      alert(`Video Generated! Timeline has ${result.timeline.length} synced segments.`);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const tools = [
     { id: "select", icon: ArrowLeft, name: "Select" },
@@ -96,6 +113,31 @@ const VideoEditor = () => {
             </div>
 
             <div className="flex items-center gap-2">
+              <div className="flex items-center bg-muted rounded-lg p-1 mr-4">
+                <Button
+                  variant={generationType === 'short' ? 'secondary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setGenerationType('short')}
+                  className="text-xs"
+                >
+                  Short (60s)
+                </Button>
+                <Button
+                  variant={generationType === 'long' ? 'secondary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setGenerationType('long')}
+                  className="text-xs"
+                >
+                  Long (5m)
+                </Button>
+              </div>
+
+              <Button variant="outline" size="sm" onClick={handleGenerateVideo} disabled={isGenerating}>
+                {isGenerating ? "Generating..." : "AI Generate"}
+              </Button>
+
+              <div className="h-6 w-px bg-border mx-2" />
+
               <Button variant="outline" size="sm">
                 <Undo className="h-4 w-4" />
               </Button>

@@ -72,37 +72,7 @@ const Hero = () => {
             engaging AI videos that captivate your audience and boost your social media presence.
           </p>
 
-          {/* Pricing Toggle */}
-          <div className="flex items-center justify-center space-x-4 mb-8 animate-fade-in delay-300">
-            <span className={`text-muted-foreground ${!isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>Monthly</span>
-            <button
-              onClick={() => setIsYearly(!isYearly)}
-              className="relative glass rounded-full p-1 w-16 h-8"
-            >
-              <div className={`absolute top-1 w-6 h-6 bg-primary rounded-full transition-transform ${isYearly ? 'translate-x-8' : 'translate-x-1'
-                }`} />
-            </button>
-            <span className={`${isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>
-              Yearly <span className="text-feature-accent">(Save 20%)</span>
-            </span>
-          </div>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 animate-fade-in delay-400">
-            <Button
-              className="cta-primary"
-              onClick={handleStartFree}
-            >
-              Start Free
-              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Button>
-            <Button
-              className="cta-secondary"
-              onClick={handleStartProTrial}
-            >
-              Start Pro Trial
-            </Button>
-          </div>
+          <div className="h-16"></div> {/* Spacer since buttons are gone */}
 
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-2xl mx-auto animate-fade-in delay-600">

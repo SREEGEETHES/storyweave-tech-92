@@ -34,9 +34,8 @@ const NavigationDropdown = ({ label, items, currentPath }: NavigationDropdownPro
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center space-x-1 transition-colors ${
-          items.some(item => currentPath === item.href) ? 'text-primary' : 'text-foreground/80 hover:text-primary'
-        }`}
+        className={`flex items-center space-x-1 transition-colors ${items.some(item => currentPath === item.href) ? 'text-primary' : 'text-foreground/80 hover:text-primary'
+          }`}
       >
         <span>{label}</span>
         {isOpen ? (
@@ -47,7 +46,7 @@ const NavigationDropdown = ({ label, items, currentPath }: NavigationDropdownPro
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-64 bg-background border border-border rounded-lg shadow-lg z-50">
+        <div className="absolute top-full left-0 mt-2 w-64 bg-background border border-border rounded-lg shadow-lg z-[200] animate-fade-in-up">
           <div className="py-2">
             {items.map((item, index) => (
               <a
@@ -57,7 +56,7 @@ const NavigationDropdown = ({ label, items, currentPath }: NavigationDropdownPro
                 onClick={(e) => {
                   e.preventDefault();
                   setIsOpen(false);
-                  
+
                   // Handle section scrolling
                   if (item.href.includes('#')) {
                     const [path, section] = item.href.split('#');

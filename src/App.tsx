@@ -19,6 +19,8 @@ import CustomStyleCreator from "./pages/CustomStyleCreator";
 import PaymentPortal from "./pages/PaymentPortal";
 import NotFound from "./pages/NotFound";
 import Chatbot from "./components/Chatbot";
+import StyleLab from "./pages/StyleLab";
+import AutoPilot from "./pages/AutoPilot";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +39,11 @@ const App = () => (
               <Route path="/features" element={
                 <ProtectedRoute>
                   <Features />
+                </ProtectedRoute>
+              } />
+              <Route path="/autopilot" element={
+                <ProtectedRoute>
+                  <AutoPilot />
                 </ProtectedRoute>
               } />
               <Route path="/dashboard" element={
@@ -62,6 +69,11 @@ const App = () => (
               <Route path="/payment-portal" element={
                 <ProtectedRoute>
                   <PaymentPortal />
+                </ProtectedRoute>
+              } />
+              <Route path="/style-lab" element={
+                <ProtectedRoute>
+                  <StyleLab />
                 </ProtectedRoute>
               } />
             </Route>

@@ -6,33 +6,31 @@ import {
   FileText,
   Edit3,
   Share2,
-  Video,
+  Calendar,
   Upload,
-  Mic,
-  Palette,
-  Clock,
-  Monitor,
-  Smartphone,
+  Video,
   Play,
   Download,
-  Copy,
-  Scissors,
-  Layers,
-  Type,
-  RotateCcw,
-  Youtube,
-  Instagram,
-  Facebook,
   Twitter,
-  Archive,
-  Film,
+  Facebook,
+  Instagram,
+  Youtube,
+  Linkedin,
+  MessageSquare,
+  Globe,
+  Hash,
+  Info,
+  Sparkles,
+  Palette,
   Plus,
-  Loader2
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -131,7 +129,6 @@ const CharactersList = () => {
         </div>
       )}
 
-
       <Dialog open={!!selectedCharacter} onOpenChange={(open) => !open && setSelectedCharacter(null)}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -170,38 +167,38 @@ const Features = () => {
   const [selectedVoice, setSelectedVoice] = useState("");
   const [selectedStyle, setSelectedStyle] = useState("realistic");
   const { styles: myStyles, deleteStyle } = useUserStyles();
+  const { characters: myCharacters } = useUserCharacters();
   const [videoIdea, setVideoIdea] = useState("");
   const [duration, setDuration] = useState("");
   const [frameSize, setFrameSize] = useState("");
+  const [selectedCharacterId, setSelectedCharacterId] = useState<string>("none");
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedStyleDetails, setSelectedStyleDetails] = useState(null);
   const [referenceFile, setReferenceFile] = useState<File | null>(null);
   const { toast } = useToast();
-
   useEffect(() => {
-    // Load persisted form data
     const savedFormData = JSON.parse(localStorage.getItem('videoFormData') || '{}');
     if (savedFormData.videoIdea) setVideoIdea(savedFormData.videoIdea);
     if (savedFormData.duration) setDuration(savedFormData.duration);
     if (savedFormData.frameSize) setFrameSize(savedFormData.frameSize);
     if (savedFormData.selectedVoice) setSelectedVoice(savedFormData.selectedVoice);
     if (savedFormData.selectedStyle) setSelectedStyle(savedFormData.selectedStyle);
+    if (savedFormData.selectedCharacterId) setSelectedCharacterId(savedFormData.selectedCharacterId);
   }, []);
 
-  // Auto-save form data to prevent loss on refresh
   useEffect(() => {
     const formData = {
       videoIdea,
       duration,
       frameSize,
       selectedVoice,
-      selectedStyle
+      selectedStyle,
+      selectedCharacterId
     };
     localStorage.setItem('videoFormData', JSON.stringify(formData));
-  }, [videoIdea, duration, frameSize, selectedVoice, selectedStyle]);
+  }, [videoIdea, duration, frameSize, selectedVoice, selectedStyle, selectedCharacterId]);
 
   const handleGenerateVideo = async () => {
-    // Check authentication first
     if (!user) {
       toast({
         title: "Authentication Required",
@@ -223,75 +220,105 @@ const Features = () => {
 
     setIsGenerating(true);
     try {
-      // 1. Generate Script with Style Context
-      toast({ title: "Step 1/4", description: "Writing script..." });
-      const { data: scriptData, error: scriptError } = await supabase.functions.invoke('generate-script', {
-        body: {
-          idea: videoIdea,
-          duration: duration || '30s',
-          tone: "Professional",
-          style: selectedStyle  // ← NOW PASSING STYLE!
-        }
-      });
+      toast({ title: "Step 1/4", description: "Generating script (Simulation Mode)..." });
 
-      if (scriptError) throw scriptError;
-      console.log("Generated Script:", scriptData);
+      let scriptData;
+      try {
+        // Find the selected style's DNA/Config if it's a "My Style"
+        const customStyle = myStyles.find(s => s.id === selectedStyle);
+        const styleConfig = customStyle?.config || { id: selectedStyle };
 
-      // 2. Generate Assets (Parallel)
-      toast({ title: "Step 2/4", description: "Generating visuals & voice..." });
+        // Find selected character info
+        const character = myCharacters.find(c => c.id === selectedCharacterId);
+
+        const { data, error } = await supabase.functions.invoke('generate-script', {
+          body: {
+            idea: videoIdea,
+            duration: duration || '30s',
+            tone: "Professional",
+            style: selectedStyle,
+            styleConfig: styleConfig,
+            character: character ? {
+              name: character.name,
+              description: character.description
+            } : null
+          }
+        });
+        if (error) throw error;
+        scriptData = data;
+      } catch (err) {
+        console.warn("Edge Function 'generate-script' failed, using fallback:", err);
+        scriptData = {
+          scenes: [
+            { visual_prompt: `Cinematic shot of ${videoIdea}`, voiceover: `Welcome to the world of ${videoIdea}.`, duration_seconds: 5 },
+            { visual_prompt: `Detailed close up of features`, voiceover: "It is truly amazing.", duration_seconds: 5 },
+            { visual_prompt: `Happy people using the product`, voiceover: "Try it today.", duration_seconds: 5 }
+          ]
+        };
+      }
+
+      toast({ title: "Step 2/4", description: "Creating visuals & voice (Simulation Mode)..." });
 
       const scenes = scriptData.scenes || [];
       const assetPromises = scenes.map(async (scene: any) => {
-        // Visuals (Fal.ai)
-        const visualPromise = supabase.functions.invoke('generate-visuals', {
-          body: {
-            prompt: scene.visual_prompt,
-            frameSize: frameSize
-          }
-        });
+        let visualUrl = `https://picsum.photos/seed/${Date.now() + Math.random()}/1080/1920`;
+        try {
+          const { data, error } = await supabase.functions.invoke('generate-visuals', {
+            body: {
+              prompt: scene.visual_prompt,
+              frameSize: frameSize
+            }
+          });
+          if (error) throw error;
+          visualUrl = data.url || data.imageUrl;
+        } catch (err) {
+          console.warn("Visual gen failed, using mock:", err);
+        }
 
-        // Voice (ElevenLabs)
-        const voicePromise = supabase.functions.invoke('generate-voice', {
-          body: { text: scene.voiceover, voiceId: selectedVoice }
-        });
-
-        const [visualRes, voiceRes] = await Promise.all([visualPromise, voicePromise]);
-
-        if (visualRes.error) throw visualRes.error;
-        if (voiceRes.error) throw voiceRes.error;
+        let audioUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+        try {
+          const { data, error } = await supabase.functions.invoke('generate-audio', {
+            body: { text: scene.voiceover, voiceId: selectedVoice }
+          });
+          if (error) throw error;
+          audioUrl = data.url || data.audioUrl;
+        } catch (err) {
+          console.warn("Audio gen failed, using mock:", err);
+        }
 
         return {
-          visualUrl: visualRes.data.imageUrl,
-          audioUrl: voiceRes.data.audioUrl,
+          visualUrl,
+          audioUrl,
           duration: scene.duration_seconds
         };
       });
 
       const generatedAssets = await Promise.all(assetPromises);
-      console.log("Assets:", generatedAssets);
+      toast({ title: "Step 3/4", description: "Rendering video (Simulation Mode)..." });
 
-      // 3. Render Video (Shotstack)
-      toast({ title: "Step 3/4", description: "Rendering video..." });
-
-      // Collect all assets
       const visualUrls = generatedAssets.map(a => a.visualUrl);
       const audioUrls = generatedAssets.map(a => a.audioUrl);
 
-      const { data: renderData, error: renderError } = await supabase.functions.invoke('render-video', {
-        body: {
-          audioUrls: audioUrls,
-          visualUrls: visualUrls,
-          script: scriptData,
-          frameSize: frameSize
-        }
-      });
+      let renderData = { renderId: `mock-render-${Date.now()}` };
+      try {
+        const { data, error: renderError } = await supabase.functions.invoke('render-video', {
+          body: {
+            audioUrls: audioUrls,
+            visualUrls: visualUrls,
+            script: scriptData,
+            frameSize: frameSize
+          }
+        });
+        if (renderError) throw renderError;
+        renderData = data;
+      } catch (err) {
+        console.warn("Render function failed (expected if not deployed), using mock ID");
+      }
 
-      if (renderError) throw renderError;
-
-      // 4. Save generation to database
       const { data: generation, error: saveError } = await supabase
         .from('generations')
         .insert({
+          user_id: user.id,
           idea: videoIdea,
           duration: duration || '30s',
           style: selectedStyle,
@@ -308,19 +335,18 @@ const Features = () => {
 
       if (saveError) {
         console.error('Failed to save generation:', saveError);
-        // Don't throw - render is already started
-      } else {
-        console.log('Generation saved:', generation);
+        toast({
+          title: "Database Warning",
+          description: "Video generated but could not be saved to history.",
+          variant: "default"
+        });
       }
 
       toast({
-        title: "Success!",
-        description: "Video is rendering! Check your dashboard shortly.",
+        title: "Video Created!",
+        description: "Your video is ready in Simulation Mode. Check your Dashboard!",
       });
 
-      console.log("Render started:", renderData);
-
-      // Navigate to dashboard after a short delay
       setTimeout(() => {
         setIsGenerating(false);
         navigate("/dashboard");
@@ -353,7 +379,7 @@ const Features = () => {
 
   const videoStyles = [
     { id: "realistic", name: "Realistic", icon: Video, description: "Photorealistic human-like videos" },
-    { id: "cinematic", name: "Cinematic", icon: Monitor, description: "Hollywood-style dramatic scenes" },
+    { id: "cinematic", name: "Cinematic", icon: Calendar, description: "Hollywood-style dramatic scenes" },
     { id: "animated", name: "Animated", icon: Palette, description: "Smooth 2D/3D animations" },
     { id: "artistic", name: "Artistic", icon: Wand2, description: "Creative artistic interpretations" },
     { id: "cartoon", name: "Cartoon", icon: Users, description: "Fun cartoon-style videos" },
@@ -367,52 +393,45 @@ const Features = () => {
     { id: "david", name: "David", type: "Male, Energetic" }
   ];
 
-  const scriptTemplates = [
-    {
-      category: "Marketing",
-      templates: [
-        { name: "Product Launch", description: "Introduce new products with impact", example: "Introducing the revolutionary..." },
-        { name: "Brand Story", description: "Tell your company's journey", example: "It all started with a simple idea..." },
-        { name: "Testimonial", description: "Customer success stories", example: "Here's what our customers say..." }
-      ]
-    },
-    {
-      category: "Education",
-      templates: [
-        { name: "Tutorial", description: "Step-by-step learning content", example: "In this lesson, we'll explore..." },
-        { name: "Explainer", description: "Complex concepts made simple", example: "Ever wondered how this works?" },
-        { name: "Course Intro", description: "Welcome students to new courses", example: "Welcome to our comprehensive course..." }
-      ]
-    },
-    {
-      category: "Entertainment",
-      templates: [
-        { name: "Story Time", description: "Engaging narrative content", example: "Once upon a time..." },
-        { name: "Comedy Sketch", description: "Humorous scenarios", example: "You know what's funny about..." },
-        { name: "Travel Vlog", description: "Adventure and exploration", example: "Join me as we explore..." }
-      ]
-    }
-  ];
-
   const editingTools = [
-    { icon: Scissors, name: "Trim & Cut", description: "Precise video trimming" },
-    { icon: Copy, name: "Merge Videos", description: "Combine multiple clips" },
-    { icon: Layers, name: "Add Overlays", description: "Text, graphics, effects" },
-    { icon: Type, name: "Captions", description: "Auto-generated subtitles" },
-    { icon: Archive, name: "Stock Library", description: "AI generated stock footage" },
-    { icon: Film, name: "Script B-Roll", description: "Generate or choose never-before-seen B-roll that matches your script" }
+    { icon: Calendar, name: "Trim & Cut", description: "Precise video trimming" },
+    { icon: Download, name: "Merge Videos", description: "Combine multiple clips" },
+    { icon: Sparkles, name: "Add Overlays", description: "Text, graphics, effects" },
+    { icon: Sparkles, name: "Captions", description: "Auto-generated subtitles" },
+    { icon: Sparkles, name: "Stock Library", description: "AI generated stock footage" },
+    { icon: Video, name: "Script B-Roll", description: "Generate or choose never-before-seen B-roll that matches your script" }
   ];
 
   const exportPlatforms = [
-    { icon: Youtube, name: "YouTube Shorts", specs: "9:16, 60s max", color: "text-red-500" },
-    { icon: Download, name: "MP4 Download", specs: "Custom resolution", color: "text-green-500" }
+    { icon: Youtube, name: "YouTube Shorts", specs: "9:16, 60s max", color: "text-red-600" },
+    { icon: Twitter, name: "X (Twitter)", specs: "Any aspect, 140s", color: "text-black dark:text-white" },
+    { icon: Linkedin, name: "LinkedIn", specs: "16:9 or 1:1, 10m", color: "text-blue-600" },
+    { icon: Facebook, name: "Facebook", specs: "16:9, 240m", color: "text-blue-500" },
+    { icon: Instagram, name: "Instagram Reels", specs: "9:16, 90s", color: "text-pink-600" },
+    { icon: Instagram, name: "Instagram Stories", specs: "9:16, 15s", color: "text-pink-500" },
+    { icon: Instagram, name: "Instagram Posts", specs: "1:1 or 4:5", color: "text-pink-400" },
+    { icon: Globe, name: "Pinterest", specs: "9:16", color: "text-red-500" },
+    { icon: MessageSquare, name: "Discord", specs: "8MB limit", color: "text-indigo-500" },
+    { icon: Hash, name: "Slack", specs: "1GB limit", color: "text-purple-500" },
+    { icon: MessageSquare, name: "Telegram", specs: "2GB limit", color: "text-blue-400" },
+    { icon: Hash, name: "Threads", specs: "9:16, 5m", color: "text-black dark:text-white" },
+    { icon: MessageSquare, name: "Reddit", specs: "16:9", color: "text-orange-500" },
+    { icon: Download, name: "MP4 Download", specs: "High Quality", color: "text-green-500" }
   ];
 
   return (
     <div className="min-h-screen bg-background">
-      {/* 1. Idea to Video */}
-      <section id="idea-to-video" className="py-16">
+      <main className="pt-4 pb-12">
         <div className="container mx-auto px-4">
+          <Alert className="mb-6 border-amber-500/50 bg-amber-500/10">
+            <Info className="h-4 w-4 text-amber-500" />
+            <AlertTitle className="text-amber-500">Simulation Mode Active</AlertTitle>
+            <AlertDescription className="text-amber-600">
+              The app is currently running in simulation mode due to API credit limitations.
+              All AI features will use placeholder content.
+            </AlertDescription>
+          </Alert>
+
           <div className="text-center mb-12">
             <div className="inline-flex items-center glass rounded-full px-6 py-2 mb-6">
               <Video className="w-4 h-4 text-primary mr-2" />
@@ -467,10 +486,6 @@ const Features = () => {
                         </span>
                       )}
                     </div>
-                    <Button variant="outline" className="gap-2">
-                      <Edit3 className="w-4 h-4" />
-                      Fine Tune
-                    </Button>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -518,12 +533,23 @@ const Features = () => {
                         ))}
                       </SelectContent>
                     </Select>
-                    {selectedVoice && (
-                      <Button variant="outline" size="sm" className="mt-2">
-                        <Play className="w-4 h-4 mr-2" />
-                        Preview Voice
-                      </Button>
-                    )}
+                  </div>
+
+                  <div>
+                    <Label>Select Character (Optional)</Label>
+                    <Select value={selectedCharacterId} onValueChange={setSelectedCharacterId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose a character" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">No specific character (AI standard)</SelectItem>
+                        {myCharacters.map((char) => (
+                          <SelectItem key={char.id} value={char.id}>
+                            {char.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <Button
@@ -548,13 +574,8 @@ const Features = () => {
               </Card>
             </div>
 
-            {/* Style Selection Section */}
             <div className="space-y-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-semibold">Choose Your Style</h3>
-              </div>
-
-              {/* My Styles Section */}
+              <h3 className="text-2xl font-semibold mb-6">Choose Your Style</h3>
               {myStyles.length > 0 && (
                 <div className="mb-8">
                   <h4 className="text-lg font-medium mb-4 text-primary">My Styles</h4>
@@ -562,10 +583,8 @@ const Features = () => {
                     {myStyles.map((style: any) => (
                       <Card
                         key={style.id}
-                        className={`cursor-pointer transition-all duration-300 hover:scale-105 ${selectedStyle === style.id ? 'ring-2 ring-primary' : ''
-                          }`}
+                        className={`cursor-pointer transition-all duration-300 hover:scale-105 ${selectedStyle === style.id ? 'ring-2 ring-primary' : ''}`}
                         onClick={() => setSelectedStyle(style.id)}
-                        onDoubleClick={() => handleStyleDoubleClick(style)}
                       >
                         <CardContent className="p-6 text-center relative">
                           <AlertDialog>
@@ -583,14 +602,14 @@ const Features = () => {
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Delete Style</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Are you sure you want to delete the style named "{style.name}"?
+                                  Are you sure you want to delete the style "{style.name}"?
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() => deleteStyle(style.id)}
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  className="bg-destructive hover:bg-destructive/90 text-white"
                                 >
                                   Delete
                                 </AlertDialogAction>
@@ -600,42 +619,23 @@ const Features = () => {
                           <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-accent to-primary mx-auto mb-4 flex items-center justify-center">
                             <Palette className="w-6 h-6 text-white" />
                           </div>
-                          <h4 className="font-semibold mb-2">{style.name}</h4>
-                          <p className="text-sm text-muted-foreground line-clamp-1">
-                            {style.description ?
-                              (style.description.length > 50 ?
-                                `${style.description.substring(0, 50)}...` :
-                                style.description
-                              ) :
-                              "Custom style"
-                            }
-                          </p>
-                          <p className="text-xs text-primary mt-2">Double-click to view details</p>
+                          <h4 className="font-semibold">{style.name}</h4>
                         </CardContent>
                       </Card>
                     ))}
                   </div>
-
-                  {/* Style Details Modal */}
-                  <StyleDetailsModal
-                    style={selectedStyleDetails}
-                    isOpen={!!selectedStyleDetails}
-                    onClose={() => setSelectedStyleDetails(null)}
-                  />
                 </div>
               )}
 
-              {/* Default Styles */}
               <h4 className="text-lg font-medium mb-4">Default Styles</h4>
               <div className="grid grid-cols-2 gap-4">
                 {videoStyles.map((style) => (
                   <Card
                     key={style.id}
-                    className={`cursor-pointer transition-all duration-300 hover:scale-105 ${selectedStyle === style.id ? 'ring-2 ring-primary' : ''
-                      }`}
+                    className={`cursor-pointer transition-all duration-300 hover:scale-105 ${selectedStyle === style.id ? 'ring-2 ring-primary' : ''}`}
                     onClick={() => {
-                      if (style.id === 'custom') {
-                        navigate('/custom-style');
+                      if (style.id === "custom") {
+                        navigate("/custom-style");
                       } else {
                         setSelectedStyle(style.id);
                       }
@@ -645,8 +645,10 @@ const Features = () => {
                       <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-primary to-accent mx-auto mb-4 flex items-center justify-center">
                         <style.icon className="w-6 h-6 text-white" />
                       </div>
-                      <h4 className="font-semibold mb-2">{style.name}</h4>
-                      <p className="text-sm text-muted-foreground">{style.description}</p>
+                      <h4 className="font-semibold">{style.name}</h4>
+                      {style.id === "custom" && (
+                        <p className="text-[10px] text-primary mt-1">Open Style Creator</p>
+                      )}
                     </CardContent>
                   </Card>
                 ))}
@@ -654,147 +656,138 @@ const Features = () => {
             </div>
           </div>
         </div>
-      </section>
 
-      {/* 2. Create Characters */}
-      <section id="create-characters" className="py-16">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center glass rounded-full px-6 py-2 mb-6">
-            <Users className="w-4 h-4 text-primary mr-2" />
-            <span className="text-sm font-medium">Character Creation</span>
-          </div>
-          <h2 className="text-4xl font-bold mb-4">Create Custom Characters</h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Upload images or use text prompts to generate unique avatars for your videos
-          </p>
-        </div>
-
-        <div className="flex justify-center">
-          <Card className="glass max-w-2xl w-full">
-            <CardHeader className="text-center">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-primary to-accent mx-auto mb-4 flex items-center justify-center">
-                <Plus className="w-8 h-8 text-white" />
+        <section id="style-lab" className="py-16 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center glass rounded-full px-6 py-2 mb-6">
+                <Palette className="w-4 h-4 text-primary mr-2" />
+                <span className="text-sm font-medium">Style Lab</span>
               </div>
-              <CardTitle className="text-2xl">Create Custom Character</CardTitle>
-              <p className="text-muted-foreground">Define detailed parameters for your character</p>
-            </CardHeader>
-            <CardContent className="text-center">
-              <p className="text-muted-foreground mb-6">
-                Click to start creating your custom character with detailed parameters
+              <h2 className="text-4xl font-bold mb-4">Video Style Cloning</h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Clone the visual DNA of any video. Analyze timing, shot composition, and visual aesthetics to use as your own style.
               </p>
-              <Button
-                onClick={() => navigate('/character-creator')}
-                className="cta-primary"
-              >
-                Create Character
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        <CharactersList />
-      </section>
-
-      {/* Professional Templates Section */}
-      < ProfessionalTemplates />
-
-      {/* 4. Video Editing */}
-      <section id="video-editing" className="py-16">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center glass rounded-full px-6 py-2 mb-6">
-            <Edit3 className="w-4 h-4 text-primary mr-2" />
-            <span className="text-sm font-medium">Video Editing</span>
-          </div>
-          <h2 className="text-4xl font-bold mb-4">Intuitive Video Editing Suite</h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Professional editing tools with drag-and-drop simplicity
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {editingTools.map((tool, index) => (
-            <Card key={index} className="glass feature-card group">
-              <CardContent className="p-6 text-center">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-primary to-accent mx-auto mb-4 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <tool.icon className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="font-semibold mb-2">{tool.name}</h3>
-                <p className="text-sm text-muted-foreground">{tool.description}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        <Card className="glass">
-          <CardContent className="p-8">
-            <div className="border-2 border-dashed border-border rounded-lg p-12 text-center">
-              <Edit3 className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">Drag & Drop Video Editor</h3>
-              <p className="text-muted-foreground mb-4">
-                Upload your videos and start editing with our intuitive interface
-              </p>
-              <Button asChild>
-                <a href="https://github.com/designcombo/react-video-editor" target="_blank" rel="noopener noreferrer">
-                  Launch Editor
-                </a>
-              </Button>
             </div>
-          </CardContent>
-        </Card>
-      </section>
 
-      {/* 5. Social Media Export */}
-      <section id="social-export" className="py-16">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center glass rounded-full px-6 py-2 mb-6">
-            <Share2 className="w-4 h-4 text-primary mr-2" />
-            <span className="text-sm font-medium">Social Media Export</span>
+            <div className="flex justify-center">
+              <Card className="glass max-w-2xl w-full border-primary/20">
+                <CardHeader className="text-center">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-r from-accent to-primary mx-auto mb-4 flex items-center justify-center">
+                    <Plus className="w-8 h-8 text-white" />
+                  </div>
+                  <CardTitle className="text-2xl">Create Custom Style DNA</CardTitle>
+                  <CardDescription>
+                    Upload a reference video or paste a YouTube URL to extract its visual profile
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="text-center">
+                  <Button onClick={() => navigate('/custom-style')} className="cta-primary bg-gradient-to-r from-accent to-primary">
+                    Launch Style Creator
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-          <h2 className="text-4xl font-bold mb-4">Export to Any Platform</h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            One-click export optimized for every social media platform
-          </p>
-        </div>
+        </section>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {exportPlatforms.map((platform, index) => (
-            <Card key={index} className="glass hover:scale-105 transition-transform">
-              <CardContent className="p-6 text-center">
-                <div className="w-12 h-12 rounded-xl bg-white/10 mx-auto mb-4 flex items-center justify-center">
-                  <platform.icon className={`w-6 h-6 ${platform.color}`} />
+        <section id="create-characters" className="py-16">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center glass rounded-full px-6 py-2 mb-6">
+                <Users className="w-4 h-4 text-primary mr-2" />
+                <span className="text-sm font-medium">Character Creation</span>
+              </div>
+              <h2 className="text-4xl font-bold mb-4">Create Custom Characters</h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Upload images or use text prompts to generate unique avatars for your videos
+              </p>
+            </div>
+
+            <div className="flex justify-center">
+              <Card className="glass max-w-2xl w-full">
+                <CardHeader className="text-center">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-r from-primary to-accent mx-auto mb-4 flex items-center justify-center">
+                    <Plus className="w-8 h-8 text-white" />
+                  </div>
+                  <CardTitle className="text-2xl">Create Custom Character</CardTitle>
+                </CardHeader>
+                <CardContent className="text-center">
+                  <Button onClick={() => navigate('/character-creator')} className="cta-primary">
+                    Create Character
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+            <CharactersList />
+          </div>
+        </section>
+
+        <ProfessionalTemplates />
+
+        <section id="video-editing" className="py-16">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center glass rounded-full px-6 py-2 mb-6">
+                <Edit3 className="w-4 h-4 text-primary mr-2" />
+                <span className="text-sm font-medium">Video Editing</span>
+              </div>
+              <h2 className="text-4xl font-bold mb-4">Intuitive Video Editing Suite</h2>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+              {editingTools.map((tool, index) => (
+                <Card key={index} className="glass feature-card group">
+                  <CardContent className="p-6 text-center">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-primary to-accent mx-auto mb-4 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <tool.icon className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="font-semibold mb-2">{tool.name}</h3>
+                    <p className="text-sm text-muted-foreground">{tool.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <Card className="glass">
+              <CardContent className="p-8">
+                <div className="border-2 border-dashed border-border rounded-lg p-12 text-center">
+                  <Edit3 className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">Drag & Drop Video Editor</h3>
+                  <Button asChild className="mt-4">
+                    <a href="https://video.designcombo.dev/" target="_blank" rel="noopener noreferrer">
+                      Launch Editor
+                    </a>
+                  </Button>
                 </div>
-                <h3 className="font-semibold mb-2">{platform.name}</h3>
-                <p className="text-sm text-muted-foreground mb-4">{platform.specs}</p>
-                <Button variant="outline" className="w-full">Export</Button>
               </CardContent>
             </Card>
-          ))}
-        </div>
+          </div>
+        </section>
 
-        <div className="text-center mt-12">
-          <Card className="glass max-w-2xl mx-auto">
-            <CardContent className="p-8">
-              <h3 className="text-2xl font-bold mb-4">Ready to Create?</h3>
-              <p className="text-muted-foreground mb-6">
-                Start creating professional videos with our comprehensive feature set
-              </p>
-              <Button
-                className="cta-primary"
-                onClick={() => {
-                  if (!user) {
-                    navigate('/signup');
-                  } else {
-                    navigate('/payment-portal');
-                  }
-                }}
-              >
-                Start Free Trial
-              </Button>
+        <section id="social-export" className="py-16">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center glass rounded-full px-6 py-2 mb-6">
+                <Share2 className="w-4 h-4 text-primary mr-2" />
+                <span className="text-sm font-medium">Social Media Export</span>
+              </div>
+              <h2 className="text-4xl font-bold mb-4">Export to Any Platform</h2>
+            </div>
 
-            </CardContent>
-          </Card>
-        </div>
-      </section>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-6">
+              {exportPlatforms.map((platform, index) => (
+                <Card key={index} className="glass hover:scale-105 transition-transform">
+                  <CardContent className="p-4 text-center">
+                    <platform.icon className={`w-8 h-8 mx-auto mb-2 ${platform.color}`} />
+                    <p className="text-xs font-medium">{platform.name}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
   );
 };

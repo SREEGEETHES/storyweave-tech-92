@@ -123,7 +123,7 @@ const Signup = () => {
             Create Account
           </CardTitle>
           <CardDescription>
-            Join CinemaForge AI and start creating amazing videos
+            Join N4 CLIPS and start creating amazing videos
             {selectedPlan !== "Free" && (
               <div className="mt-2 p-2 glass rounded-lg">
                 <span className="text-primary font-medium">Selected: {selectedPlan} Plan</span>

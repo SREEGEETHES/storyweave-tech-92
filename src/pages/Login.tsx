@@ -31,7 +31,7 @@ const Login = () => {
 
       toast({
         title: "Login Successful!",
-        description: "Welcome back to CinemaForge AI",
+        description: "Welcome back to N4 CLIPS",
       });
       navigate('/dashboard');
     } catch (error: any) {
@@ -91,7 +91,7 @@ const Login = () => {
             Welcome Back
           </CardTitle>
           <CardDescription>
-            Sign in to your CinemaForge AI account
+            Sign in to your N4 CLIPS account
           </CardDescription>
         </CardHeader>
 

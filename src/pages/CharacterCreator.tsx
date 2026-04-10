@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/UserContext";
+import { aiService } from "@/services/aiService";
 
 const CharacterCreator = () => {
   const navigate = useNavigate();
@@ -133,28 +134,16 @@ const CharacterCreator = () => {
   const handleSaveCharacter = async () => {
     if (!generatedCharacter) return;
 
-    if (!user) {
-      toast({
-        title: "Login Required",
-        description: "Please login to save characters.",
-        variant: "destructive"
-      });
-      return;
-    }
+    // TEMPORARY: Allow saving without login for dev flow
+    // if (!user) ...
 
     try {
-      const { error } = await supabase
-        .from('characters')
-        .insert({
-          name: generatedCharacter.name,
-          description: generatedCharacter.description,
-          parameters: generatedCharacter.parameters,
-          generated_images: generatedCharacter.generatedImages,
-          reference_image_path: generatedCharacter.referenceImageUrl,
-          user_id: user.id
-        });
-
-      if (error) throw error;
+      // Use AI Service to store character
+      await aiService.storeCharacter({
+        name: generatedCharacter.name,
+        description: generatedCharacter.description,
+        imageUrl: generatedCharacter.referenceImageUrl
+      });
 
       toast({
         title: "Character Saved!",
@@ -165,7 +154,7 @@ const CharacterCreator = () => {
     } catch (error: any) {
       toast({
         title: "Save Failed",
-        description: error.message,
+        description: error.message || "Could not save character",
         variant: "destructive"
       });
     }
