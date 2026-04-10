@@ -3,6 +3,7 @@ import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import dotenv from 'dotenv';
 import { videoRoutes } from './routes/video.js';
+import { renderRoutes } from './routes/render.js';
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ fastify.decorate('authenticate', async (request: any, reply: any) => {
 
 // Register routes
 fastify.register(videoRoutes, { prefix: '/video' });
+fastify.register(renderRoutes, { prefix: '/render' });
 
 // Health check
 fastify.get('/health', async () => {

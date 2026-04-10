@@ -23,7 +23,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import type {
   HistoryEntry,
   MarqueeRect,
@@ -123,7 +122,7 @@ const EditorContext = createContext<EditorContextValue | undefined>(undefined);
 // UUID shim — use crypto.randomUUID if uuidv4 not available
 // -------------------------------------------------------------------------
 function genId(): string {
-  try { return uuidv4(); } catch { return crypto.randomUUID(); }
+  return crypto.randomUUID();
 }
 
 // -------------------------------------------------------------------------

@@ -16,11 +16,11 @@
 
 ## 🎨 Sprint 3: The Hybrid Visual Editor (Frontend)
 *Goal: Build a manual editor heavily inspired by DesignCombo and Remotion Editor Starter, allowing both AI-prompted changes and deep manual adjustments.*
-- [ ] Scaffold the **Advanced Timeline Editor** (Multi-track, Drag & drop clips, Real-time Remotion preview).
-- [ ] Implement the **"Gap" Editor Features**: Audio waveforms on tracks, filmstrip thumbnails, rolling edits/split tool.
-- [ ] Build the **Inspector Panels**: Volume/fade controls, crop/border-radius, align/position composition inspector.
-- [ ] Add advanced timeline interactions: Undo/redo history stack, snapping & marquee select.
-- [ ] Integrate **Klipy GIF API** (`KLIPY-com/Klipy-GIF-API`) as native GIF item types and implement advanced caption item types.
+- [x] Scaffold the **Advanced Timeline Editor** (Multi-track, Drag & drop clips, Real-time Remotion preview).
+- [x] Implement the **"Gap" Editor Features**: Audio waveforms on tracks, filmstrip thumbnails, rolling edits/split tool.
+- [x] Build the **Inspector Panels**: Volume/fade controls, crop/border-radius, align/position composition inspector.
+- [x] Add advanced timeline interactions: Undo/redo history stack, snapping & marquee select.
+- [x] Integrate **Klipy GIF API** (`KLIPY-com/Klipy-GIF-API`) as native GIF item types and implement advanced caption item types.
 
 ## 🚀 Sprint 4: Rendering & Backend Pipeline (Remotion Lambda)
 *Goal: Build the robust cloud rendering infrastructure modeled after the DesignCombo + Remotion Lambda architecture.*
