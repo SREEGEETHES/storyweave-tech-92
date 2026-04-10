@@ -1,10 +1,18 @@
 /**
- * Edge Function: generate-audio
- * --------------------------------
- * Generates a voiceover audio file via Qwen3-TTS running on the GPU server.
- * Called by the frontend aiService.generateAudio().
+ * Edge Function: generate-bgm
+ * ----------------------------
+ * Generates background music via ACE-Step 1.5 running on the GPU server.
+ * Called by the frontend aiService.generateBGM().
  *
- * Request body:  { text: string, voice?: string, language?: string, speed?: number }
+ * Request body:
+ *   {
+ *     prompt:   string   — music description
+ *     duration: number   — desired length in seconds (default: 30)
+ *     bpm?:     number   — beats per minute (default: 120)
+ *     genre?:   string   — e.g. 'cinematic', 'ambient', 'hip-hop'
+ *     mood?:    string   — e.g. 'energetic', 'calm', 'dramatic'
+ *   }
+ *
  * Response body: { url: string, duration: number }
  */
 
@@ -21,10 +29,19 @@ Deno.serve(async (req) => {
     }
 
     try {
-        const { text, voice = 'default', language = 'en', speed = 1.0 } = await req.json()
+        const {
+            prompt,
+            duration = 30,
+            bpm = 120,
+            genre = 'cinematic',
+            mood = 'neutral',
+        } = await req.json()
 
-        if (!text || typeof text !== 'string' || text.trim().length === 0) {
-            throw new Error('text is required and must be a non-empty string')
+        if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
+            throw new Error('prompt is required and must be a non-empty string')
+        }
+        if (typeof duration !== 'number' || duration < 5 || duration > 300) {
+            throw new Error('duration must be a number between 5 and 300 seconds')
         }
 
         const gpuServerUrl = Deno.env.get('GPU_SERVER_URL')
@@ -37,15 +54,17 @@ Deno.serve(async (req) => {
         const headers: Record<string, string> = { 'Content-Type': 'application/json' }
         if (gpuApiKey) headers['X-API-Key'] = gpuApiKey
 
-        const response = await fetch(`${gpuServerUrl}/tts/generate`, {
+        const response = await fetch(`${gpuServerUrl}/bgm/generate`, {
             method: 'POST',
             headers,
-            body: JSON.stringify({ text: text.trim(), voice, language, speed }),
+            body: JSON.stringify({ prompt: prompt.trim(), duration, bpm, genre, mood }),
+            // BGM generation can be slow — Supabase edge timeout is 150s by default;
+            // set the GPU server's ACE-Step timeout on the server side.
         })
 
         if (!response.ok) {
             const errorBody = await response.text()
-            throw new Error(`GPU server TTS error ${response.status}: ${errorBody}`)
+            throw new Error(`GPU server BGM error ${response.status}: ${errorBody}`)
         }
 
         const data: { audio_url: string; duration_seconds: number } = await response.json()

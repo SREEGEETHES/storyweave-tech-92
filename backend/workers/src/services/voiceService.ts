@@ -1,26 +1,24 @@
-import axios from 'axios';
-import dotenv from 'dotenv';
+/**
+ * Voice Service
+ * -------------
+ * BullMQ-facing wrapper around Qwen3-TTS.
+ * Called by the voice-generation worker in index.ts.
+ */
 
-dotenv.config();
+import { generateTTS, QwenTTSOptions, TTSResult } from './qwenTTSService.js';
 
-const API_KEY = process.env.ELEVENLABS_API_KEY;
+export { TTSResult };
 
-export const generateVoiceover = async (text: string, voiceId: string = 'adam'): Promise<string> => {
-    // TODO: Implement actual ElevenLabs API call
-    console.log(`Generating voiceover for text: ${text}`);
-
-    // Simulation for now
-    return `https://audio.example.com/vo_${Math.random().toString(36).substr(2, 9)}.mp3`;
-
-    /*
-    const response = await axios.post(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
-      text,
-      model_id: 'eleven_monolingual_v1',
-    }, {
-      headers: { 'xi-api-key': API_KEY, 'Content-Type': 'application/json' },
-      responseType: 'arraybuffer'
-    });
-    // TODO: Save to S3 and return URL
-    return 's3://bucket/audio.mp3';
-    */
-};
+/**
+ * Generate a voiceover for a script segment.
+ *
+ * @param text     Narration text to synthesise.
+ * @param options  Optional Qwen3-TTS overrides (voice, language, speed).
+ * @returns        S3 audio URL and duration in seconds.
+ */
+export async function generateVoiceover(text: string, options: QwenTTSOptions = {}): Promise<TTSResult> {
+    console.log(`[VoiceService] Generating TTS for: "${text.slice(0, 80)}…"`);
+    const result = await generateTTS(text, options);
+    console.log(`[VoiceService] Done — ${result.durationSeconds.toFixed(2)}s → ${result.audioUrl}`);
+    return result;
+}

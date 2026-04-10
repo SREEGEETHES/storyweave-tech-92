@@ -1,0 +1,36 @@
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+python-multipart==0.0.20
+pydantic==2.10.4
+pydantic-settings==2.7.0
+httpx==0.28.1
+python-dotenv==1.0.1
+
+# Qwen3-TTS
+transformers==4.48.0
+torch==2.5.1
+torchaudio==2.5.1
+accelerate==1.3.0
+soundfile==0.12.1
+
+# ACE-Step 1.5 (music generation)
+# Install from source: pip install git+https://github.com/ace-step/ACE-Step.git
+# Requires: torch, torchaudio (already listed above)
+einops==0.8.0
+librosa==0.10.2
+
+# Whisper (faster-whisper for production inference)
+faster-whisper==1.1.1
+ffmpeg-python==0.2.0
+
+# Seedream 5.0 Lite (Diffusers-based)
+diffusers==0.31.0
+Pillow==11.1.0
+safetensors==0.4.5
+
+# Storage (S3)
+boto3==1.35.86
+
+# Async utilities
+anyio==4.7.0
+aiofiles==24.1.0

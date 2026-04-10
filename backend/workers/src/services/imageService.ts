@@ -1,24 +1,24 @@
-import axios from 'axios';
-import dotenv from 'dotenv';
+/**
+ * Image Service
+ * -------------
+ * BullMQ-facing wrapper around Seedream 5.0 Lite.
+ * Called by the image-generation worker in index.ts.
+ */
 
-dotenv.config();
+import { generateImage as seedreamGenerate, SeedreamOptions, SeedreamResult } from './seedreamService.js';
 
-const API_KEY = process.env.NANO_BANANA_API_KEY;
+export { SeedreamResult };
 
-export const generateImage = async (prompt: string): Promise<string> => {
-    // TODO: Implement actual Nano Banana API call
-    console.log(`Generating image for prompt: ${prompt}`);
-
-    // Simulation for now
-    return `https://images.example.com/generated_${Math.random().toString(36).substr(2, 9)}.png`;
-
-    /*
-    const response = await axios.post('https://api.nanobanana.com/v1/generate', {
-      prompt,
-      // ... other params
-    }, {
-      headers: { Authorization: `Bearer ${API_KEY}` }
-    });
-    return response.data.imageUrl;
-    */
-};
+/**
+ * Generate a scene image from a visual prompt.
+ *
+ * @param prompt   Visual description from the video script.
+ * @param options  Optional Seedream overrides (resolution, steps, seed).
+ * @returns        S3 image URL.
+ */
+export async function generateImage(prompt: string, options: SeedreamOptions = {}): Promise<SeedreamResult> {
+    console.log(`[ImageService] Generating image for: "${prompt.slice(0, 80)}…"`);
+    const result = await seedreamGenerate(prompt, options);
+    console.log(`[ImageService] Done → ${result.imageUrl}`);
+    return result;
+}

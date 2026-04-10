@@ -10,9 +10,9 @@
 - [ ] Build the `VideoStateContext` to share data across the app.
 
 ## 🧠 Sprint 2: AI Factory 
-- [ ] Write the Python/Node scripts for **Qwen3-TTS** and **ACE-Step 1.5** integration.
-- [ ] Connect the **Whisper** local endpoint for captioning.
-- [ ] Connect the **Seedream 5.0 Lite** (Image) API structure.
+- [x] Write the Python/Node scripts for **Qwen3-TTS** and **ACE-Step 1.5** integration.
+- [x] Connect the **Whisper** local endpoint for captioning.
+- [x] Connect the **Seedream 5.0 Lite** (Image) API structure.
 
 ## 🎨 Sprint 3: The Hybrid Visual Editor (Frontend)
 *Goal: Build a manual editor heavily inspired by DesignCombo and Remotion Editor Starter, allowing both AI-prompted changes and deep manual adjustments.*

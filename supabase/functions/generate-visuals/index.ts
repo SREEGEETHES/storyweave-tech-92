@@ -1,3 +1,13 @@
+/**
+ * Edge Function: generate-visuals
+ * ---------------------------------
+ * Generates a scene image via Seedream 5.0 Lite running on the GPU server.
+ * Called by the frontend aiService.generateVideoSegment().
+ *
+ * Request body:  { prompt: string, frameSize?: '16:9' | '9:16' | '1:1', steps?: number, seed?: number }
+ * Response body: { url: string }
+ */
+
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 
 const corsHeaders = {
@@ -11,56 +21,61 @@ Deno.serve(async (req) => {
     }
 
     try {
-        const { prompt, frameSize } = await req.json()
-        const falKey = Deno.env.get('FAL_KEY')
+        const { prompt, frameSize = '16:9', steps = 30, seed } = await req.json()
 
-        if (!falKey) {
-            // Fallback for demo if key missing, or throw error
-            throw new Error("Missing FAL_KEY")
+        if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
+            throw new Error('prompt is required and must be a non-empty string')
         }
 
-        // Map frontend aspect ratio to Fal.ai image_size enum
-        let imageSize = "landscape_16_9";
+        // Map aspect ratio to pixel dimensions (Seedream supports arbitrary sizes)
+        let width = 1920, height = 1080
         if (frameSize === '9:16' || frameSize === 'portrait') {
-            imageSize = "portrait_16_9";
+            width = 1080; height = 1920
         } else if (frameSize === '1:1' || frameSize === 'square') {
-            imageSize = "square_hd";
+            width = 1080; height = 1080
         }
 
-        // Example call to Fal.ai (Fast SDXL)
-        const response = await fetch('https://queue.fal.run/fal-ai/fast-sdxl', {
+        const gpuServerUrl = Deno.env.get('GPU_SERVER_URL')
+        const gpuApiKey    = Deno.env.get('GPU_SERVER_API_KEY') ?? ''
+
+        if (!gpuServerUrl) {
+            throw new Error('GPU_SERVER_URL environment variable is not set')
+        }
+
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+        if (gpuApiKey) headers['X-API-Key'] = gpuApiKey
+
+        const body: Record<string, unknown> = {
+            prompt: prompt.trim(),
+            width,
+            height,
+            steps,
+            negative_prompt: 'blurry, low quality, distorted, watermark, text, logo, nsfw',
+        }
+        if (seed !== undefined) body['seed'] = seed
+
+        const response = await fetch(`${gpuServerUrl}/image/generate`, {
             method: 'POST',
-            headers: {
-                'Authorization': `Key ${falKey}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                prompt: prompt,
-                image_size: imageSize,
-                num_inference_steps: 25
-            }),
+            headers,
+            body: JSON.stringify(body),
         })
 
-        const data = await response.json()
-        // Fal.ai returns a request_id for queue, or result if fast enough. 
-        // For simplicity in this v1, assume we wait or poll. 
-        // Actually, queue.fal.run usually returns result if we wait? 
-        // Let's assume we get a generic structure back. 
-        // If using the fal-client js library it handles this, but here we use fetch.
+        if (!response.ok) {
+            const errorBody = await response.text()
+            throw new Error(`GPU server Seedream error ${response.status}: ${errorBody}`)
+        }
 
-        // MOCK RESPONSE if real API fails/complex:
-        // const imageUrl = data.images[0].url;
+        const data: { image_url: string } = await response.json()
 
-        return new Response(JSON.stringify({
-            url: data.images ? data.images[0].url : "https://via.placeholder.com/1024x768"
-        }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        })
+        return new Response(
+            JSON.stringify({ url: data.image_url }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
 
     } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 400,
-        })
+        return new Response(
+            JSON.stringify({ error: (error as Error).message }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        )
     }
 })
