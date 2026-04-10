@@ -13,7 +13,7 @@
  * │ MultiTrackTimeline  (38% default, resizable)                  │
  * └────────────────────────────────────────────────────────────────┘
  */
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -26,12 +26,25 @@ import { MultiTrackTimeline } from '@/components/editor/MultiTrackTimeline';
 import { PreviewCanvas } from '@/components/editor/PreviewCanvas';
 import { InspectorPanel } from '@/components/editor/InspectorPanel';
 import { MediaLibrary } from '@/components/editor/MediaLibrary';
+import { RenderProgress } from '@/components/editor/RenderProgress';
+import { useVideoState } from '@/contexts/VideoStateContext';
 
 function EditorLayout() {
+  const { videoState } = useVideoState();
+  const [showRenderModal, setShowRenderModal] = useState(false);
+
   return (
     <div className="flex flex-col h-screen bg-zinc-950 overflow-hidden">
+      {/* Render progress modal */}
+      {showRenderModal && videoState && (
+        <RenderProgress
+          videoState={videoState}
+          onClose={() => setShowRenderModal(false)}
+        />
+      )}
+
       {/* Top toolbar */}
-      <EditorHeader />
+      <EditorHeader onRenderClick={() => setShowRenderModal(true)} />
 
       {/* Main body — vertical split: upper workspace / lower timeline */}
       <ResizablePanelGroup direction="vertical" className="flex-1 min-h-0">

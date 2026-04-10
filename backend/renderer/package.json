@@ -6,11 +6,14 @@
     "scripts": {
         "start": "remotion studio",
         "build": "remotion bundle",
-        "render": "remotion render"
+        "render": "remotion render",
+        "deploy-site": "remotion lambda sites create src/index.tsx --site-name=storyweave",
+        "deploy-function": "remotion lambda functions deploy --memory=2048 --disk=2048 --timeout=900"
     },
     "dependencies": {
         "remotion": "4.0.190",
         "@remotion/cli": "4.0.190",
+        "@remotion/lambda": "4.0.190",
         "react": "18.2.0",
         "react-dom": "18.2.0",
         "lucide-react": "^0.462.0"

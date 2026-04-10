@@ -24,12 +24,12 @@
 
 ## 🚀 Sprint 4: Rendering & Backend Pipeline (Remotion Lambda)
 *Goal: Build the robust cloud rendering infrastructure modeled after the DesignCombo + Remotion Lambda architecture.*
-- [ ] Set up the **Next.js `/api/render` route** to validate requests and map the JSON design to inputProps.
-- [ ] Implement a **Postgres/Redis Job Queue** to save render jobs (`{renderId, userId, status}`).
-- [ ] Connect the `renderMediaOnLambda()` function to spin up AWS Lambda parallel headless browser chunks.
-- [ ] Build the `/api/progress` polling endpoints and Webhook status callbacks.
-- [ ] Configure the **S3 Bucket integration** for saving input assets and the final MP4 output (with Pre-signed upload URLs).
-- [ ] Finalize the Frontend Progress UI (% bar to download link).
+- [x] Set up the **`/api/render` route** to validate requests and map the JSON design to inputProps.
+- [x] Implement a **Postgres/Redis Job Queue** to save render jobs (`{renderId, userId, status}`) in Neon.
+- [x] Connect the `renderMediaOnLambda()` function to spin up AWS Lambda parallel headless browser chunks.
+- [x] Build the `/api/progress` polling endpoints and Webhook status callbacks.
+- [x] Configure the **S3 Bucket integration** for saving input assets and the final MP4 output (with Pre-signed upload URLs).
+- [x] Finalize the Frontend Progress UI (% bar to download link).
 
 ## 🌍 Sprint 5: Infrastructure & Deployment (Future-Proofing)
 - [ ] Write the **Docker** setup (`Dockerfile` & `docker-compose.yml`) for the backend/frontend.

@@ -41,7 +41,11 @@ const TOOLS: ToolBtn[] = [
   { mode: 'hand',   icon: <Hand size={14} />,           label: 'Pan',       shortcut: 'H' },
 ];
 
-export function EditorHeader() {
+interface EditorHeaderProps {
+  onRenderClick?: () => void;
+}
+
+export function EditorHeader({ onRenderClick }: EditorHeaderProps = {}) {
   const navigate = useNavigate();
   const {
     toolMode, setToolMode,
@@ -66,11 +70,6 @@ export function EditorHeader() {
     } finally {
       setIsGenerating(false);
     }
-  };
-
-  const handleExport = () => {
-    // TODO: Sprint 4 — triggers Remotion Lambda render
-    alert('Render queued! Sprint 4 will connect this to Remotion Lambda.');
   };
 
   const handleSave = async () => {
@@ -204,9 +203,13 @@ export function EditorHeader() {
           {isSaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
         </Button>
 
-        {/* Export */}
-        <Button size="sm" className="h-7 text-xs bg-violet-600 hover:bg-violet-500 shrink-0"
-          onClick={handleExport}>
+        {/* Export / Render */}
+        <Button
+          size="sm"
+          className="h-7 text-xs bg-violet-600 hover:bg-violet-500 shrink-0"
+          onClick={onRenderClick}
+          disabled={!videoState}
+        >
           <Download size={11} className="mr-1" />
           Export
         </Button>

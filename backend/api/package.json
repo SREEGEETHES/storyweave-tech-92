@@ -14,8 +14,12 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.621.0",
+    "@aws-sdk/s3-request-presigner": "^3.621.0",
     "@fastify/cors": "^11.2.0",
     "@fastify/jwt": "^10.0.0",
+    "@neondatabase/serverless": "^0.9.4",
+    "@remotion/lambda": "4.0.190",
     "bullmq": "^5.67.1",
     "dotenv": "^17.2.3",
     "fastify": "^5.7.1",
