@@ -35,6 +35,55 @@ export interface DashboardStats {
     plan: string;
 }
 
+// ─── Sprint 6: Social Publishing ─────────────────────────────────────────────
+
+export type SocialPlatform = 'tiktok' | 'youtube' | 'instagram';
+
+export interface SocialAccount {
+    id: string;
+    user_id: string;
+    platform: SocialPlatform;
+    platform_user_id?: string;
+    platform_username?: string;
+    platform_avatar_url?: string;
+    /** Never exposed to UI — only used server-side */
+    access_token?: string;
+    token_expires_at?: string;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ScheduledPost {
+    id: string;
+    user_id: string;
+    idea: string;
+    caption: string;
+    thumbnail_url?: string;
+    /** S3 URL of the rendered MP4 from Remotion Lambda */
+    video_url: string;
+    /** ISO date string e.g. "2026-04-15" */
+    scheduled_date: string;
+    /** 24-h time string e.g. "14:30" */
+    scheduled_time: string;
+    status: 'scheduled' | 'published' | 'failed';
+    /** Array of SocialPlatform keys */
+    platforms: SocialPlatform[];
+    publish_result?: Record<string, string>;
+    error_message?: string;
+    retry_count: number;
+    created_at: string;
+    published_at?: string;
+}
+
+export interface PublishJobResult {
+    platform: SocialPlatform;
+    success: boolean;
+    post_id?: string;
+    url?: string;
+    error?: string;
+}
+
 export interface VideoState {
     id: string; // Ties back to VideoProject.id
     global: {

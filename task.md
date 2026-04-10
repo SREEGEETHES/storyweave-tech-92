@@ -38,9 +38,9 @@
 - [x] Setup standard **CI/CD pipeline** (GitHub Actions) for automatic testing and deployment.
 
 ## 📱 Sprint 6: Social Media Auto-Publishing
-- [ ] Integrate **Postiz** core publishing logic (Oauth for TikTok, Shorts, Instagram).
-- [ ] Build the "StoryWeave Publisher" UI (White-labeled, scheduled posting calendar).
-- [ ] Wire the Remotion Lambda S3 output directly into the publishing queue.
+- [x] Integrate **Postiz** core publishing logic (Oauth for TikTok, Shorts, Instagram).
+- [x] Build the "StoryWeave Publisher" UI (White-labeled, scheduled posting calendar).
+- [x] Wire the Remotion Lambda S3 output directly into the publishing queue.
 
 ---
 *Agent Instruction: Pick the top task, build it fully, then check it off.*
