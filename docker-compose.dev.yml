@@ -1,0 +1,154 @@
+# StoryWeave — Development Compose (hot-reload, source mounts)
+# ─────────────────────────────────────────────────────────────────────────────
+# Usage:  docker compose -f docker-compose.dev.yml up
+# ─────────────────────────────────────────────────────────────────────────────
+
+x-common-env: &common-env
+  NODE_ENV: development
+  REDIS_URL: redis://redis:6379
+
+services:
+  # ── Vite dev server ──────────────────────────────────────────────────────────
+  frontend:
+    image: node:20-alpine
+    working_dir: /app
+    command: sh -c "npm install -g bun && bun install && bun run dev --host"
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      VITE_API_URL: http://localhost:3001
+      VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
+      VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
+    networks:
+      - storyweave-dev
+
+  # ── API (nodemon / ts-node hot-reload) ──────────────────────────────────────
+  api:
+    image: node:20-alpine
+    working_dir: /app
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend/api:/app
+      - /app/node_modules
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      PORT: 3001
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
+      NEON_DATABASE_URL: ${NEON_DATABASE_URL}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME:-storyweave-renders-dev}
+      REMOTION_LAMBDA_FUNCTION_NAME: ${REMOTION_LAMBDA_FUNCTION_NAME}
+      REMOTION_SERVE_URL: ${REMOTION_SERVE_URL}
+      RENDER_WEBHOOK_URL: ${RENDER_WEBHOOK_URL:-http://localhost:3001/render/webhook}
+      RENDER_WEBHOOK_SECRET: ${RENDER_WEBHOOK_SECRET:-dev-webhook-secret}
+    networks:
+      - storyweave-dev
+
+  # ── Orchestrator worker ──────────────────────────────────────────────────────
+  orchestrator:
+    image: node:20-alpine
+    working_dir: /app
+    command: sh -c "npm install && npm run dev"
+    volumes:
+      - ./backend/orchestrator:/app
+      - /app/node_modules
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      NEON_DATABASE_URL: ${NEON_DATABASE_URL}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME:-storyweave-renders-dev}
+      GPU_SERVER_URL: http://gpu-server:8000
+      GPU_SERVER_API_KEY: ${GPU_SERVER_API_KEY:-dev-gpu-key}
+    networks:
+      - storyweave-dev
+
+  # ── Asset workers ────────────────────────────────────────────────────────────
+  workers:
+    image: node:20-alpine
+    working_dir: /app
+    command: sh -c "npm install && npm run dev"
+    volumes:
+      - ./backend/workers:/app
+      - /app/node_modules
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME:-storyweave-renders-dev}
+      GPU_SERVER_URL: http://gpu-server:8000
+      GPU_SERVER_API_KEY: ${GPU_SERVER_API_KEY:-dev-gpu-key}
+    networks:
+      - storyweave-dev
+
+  # ── GPU server (CPU mode for dev if no GPU available) ───────────────────────
+  gpu-server:
+    image: python:3.11-slim
+    working_dir: /app
+    command: sh -c "pip install -r requirements.txt && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/gpu-server:/app
+    environment:
+      PORT: 8000
+      GPU_SERVER_API_KEY: ${GPU_SERVER_API_KEY:-dev-gpu-key}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      S3_BUCKET: ${S3_BUCKET_NAME:-storyweave-renders-dev}
+      DEVICE: cpu
+    networks:
+      - storyweave-dev
+
+  # ── Redis ─────────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7.4-alpine
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-dev-data:/data
+    networks:
+      - storyweave-dev
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ── Redis GUI (dev convenience) ───────────────────────────────────────────────
+  redis-insight:
+    image: redis/redisinsight:latest
+    ports:
+      - "5540:5540"
+    networks:
+      - storyweave-dev
+    depends_on:
+      - redis
+
+volumes:
+  redis-dev-data:
+
+networks:
+  storyweave-dev:
+    driver: bridge

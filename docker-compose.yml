@@ -1,0 +1,188 @@
+# StoryWeave — Production Compose
+# ─────────────────────────────────────────────────────────────────────────────
+# Usage:  docker compose --env-file .env.production up -d
+# NOTE:   GPU server requires a host with NVIDIA drivers + nvidia-container-toolkit.
+#         Set COMPOSE_PROFILES=nogpu to exclude it on CPU-only machines.
+# ─────────────────────────────────────────────────────────────────────────────
+
+x-common-env: &common-env
+  NODE_ENV: production
+  REDIS_URL: redis://redis:6379
+
+services:
+  # ── Reverse proxy / static frontend ────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.frontend
+    image: storyweave/frontend:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      VITE_API_URL: /api
+    networks:
+      - storyweave
+    labels:
+      com.storyweave.service: frontend
+
+  # ── Fastify API ─────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.api
+    image: storyweave/api:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    expose:
+      - "3001"
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      PORT: 3001
+      JWT_SECRET: ${JWT_SECRET}
+      NEON_DATABASE_URL: ${NEON_DATABASE_URL}
+      AWS_REGION: ${AWS_REGION}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+      REMOTION_LAMBDA_FUNCTION_NAME: ${REMOTION_LAMBDA_FUNCTION_NAME}
+      REMOTION_SERVE_URL: ${REMOTION_SERVE_URL}
+      RENDER_WEBHOOK_URL: ${RENDER_WEBHOOK_URL}
+      RENDER_WEBHOOK_SECRET: ${RENDER_WEBHOOK_SECRET}
+    networks:
+      - storyweave
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    labels:
+      com.storyweave.service: api
+
+  # ── Orchestrator worker ─────────────────────────────────────────────────────
+  orchestrator:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.orchestrator
+    image: storyweave/orchestrator:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      NEON_DATABASE_URL: ${NEON_DATABASE_URL}
+      AWS_REGION: ${AWS_REGION}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+      GPU_SERVER_URL: http://gpu-server:8000
+      GPU_SERVER_API_KEY: ${GPU_SERVER_API_KEY}
+      REMOTION_LAMBDA_FUNCTION_NAME: ${REMOTION_LAMBDA_FUNCTION_NAME}
+      REMOTION_SERVE_URL: ${REMOTION_SERVE_URL}
+    networks:
+      - storyweave
+    labels:
+      com.storyweave.service: orchestrator
+
+  # ── Asset workers (image / voice / bgm / caption) ──────────────────────────
+  workers:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.workers
+    image: storyweave/workers:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    deploy:
+      replicas: 2
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      AWS_REGION: ${AWS_REGION}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+      GPU_SERVER_URL: http://gpu-server:8000
+      GPU_SERVER_API_KEY: ${GPU_SERVER_API_KEY}
+    networks:
+      - storyweave
+    labels:
+      com.storyweave.service: workers
+
+  # ── GPU inference server ────────────────────────────────────────────────────
+  gpu-server:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.gpu
+    image: storyweave/gpu-server:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    profiles:
+      - gpu
+    expose:
+      - "8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    environment:
+      PORT: 8000
+      GPU_SERVER_API_KEY: ${GPU_SERVER_API_KEY}
+      AWS_REGION: ${AWS_REGION}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      S3_BUCKET: ${S3_BUCKET_NAME}
+      QWEN_TTS_MODEL: ${QWEN_TTS_MODEL:-Qwen/Qwen3-TTS}
+      WHISPER_MODEL_SIZE: ${WHISPER_MODEL_SIZE:-large-v3}
+      SEEDREAM_MODEL: ${SEEDREAM_MODEL:-ByteDance-Seed/Seedream-3-0}
+    volumes:
+      - model-cache:/root/.cache/huggingface
+    networks:
+      - storyweave
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 120s
+    labels:
+      com.storyweave.service: gpu-server
+
+  # ── Redis (job queue) ────────────────────────────────────────────────────────
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    expose:
+      - "6379"
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "512mb", "--maxmemory-policy", "allkeys-lru"]
+    volumes:
+      - redis-data:/data
+    networks:
+      - storyweave
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    labels:
+      com.storyweave.service: redis
+
+# ─────────────────────────────────────────────────────────────────────────────
+volumes:
+  redis-data:
+  model-cache:
+
+networks:
+  storyweave:
+    driver: bridge

@@ -1,0 +1,152 @@
+---
+# GPU Deployment — runs on nodes with nvidia.com/gpu taint
+# Node pool setup: label nodes with `kubectl label node <node> gpu=true`
+# Taint: kubectl taint node <node> gpu=true:NoSchedule
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gpu-server
+  namespace: storyweave
+  labels:
+    app: gpu-server
+    app.kubernetes.io/part-of: storyweave
+spec:
+  replicas: 1  # Scale carefully — GPU nodes are expensive
+  selector:
+    matchLabels:
+      app: gpu-server
+  strategy:
+    type: Recreate  # Only one replica per GPU node; avoid double-loading VRAM
+  template:
+    metadata:
+      labels:
+        app: gpu-server
+    spec:
+      # Schedule only on GPU-capable nodes
+      nodeSelector:
+        gpu: "true"
+      tolerations:
+        - key: gpu
+          operator: Equal
+          value: "true"
+          effect: NoSchedule
+      # Allow extra time for model warm-up (Whisper large-v3 / Seedream)
+      terminationGracePeriodSeconds: 120
+      initContainers:
+        # Pre-pull HuggingFace models into the shared volume before serving
+        - name: model-warmup
+          image: <ECR_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/storyweave/gpu-server:latest
+          command:
+            - python
+            - -c
+            - |
+              import os, subprocess
+              models = [
+                os.getenv("QWEN_TTS_MODEL", "Qwen/Qwen3-TTS"),
+                os.getenv("SEEDREAM_MODEL",  "ByteDance-Seed/Seedream-3-0"),
+              ]
+              for m in models:
+                subprocess.run(["python", "-c", f"from huggingface_hub import snapshot_download; snapshot_download('{m}')"], check=True)
+          envFrom:
+            - configMapRef:
+                name: storyweave-config
+          env:
+            - name: GPU_SERVER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: storyweave-secrets
+                  key: GPU_SERVER_API_KEY
+          resources:
+            limits:
+              nvidia.com/gpu: "1"
+          volumeMounts:
+            - name: model-cache
+              mountPath: /root/.cache/huggingface
+      containers:
+        - name: gpu-server
+          image: <ECR_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/storyweave/gpu-server:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: storyweave-config
+          env:
+            - name: PORT
+              value: "8000"
+            - name: GPU_SERVER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: storyweave-secrets
+                  key: GPU_SERVER_API_KEY
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: storyweave-secrets
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: storyweave-secrets
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: S3_BUCKET
+              valueFrom:
+                secretKeyRef:
+                  name: storyweave-secrets
+                  key: S3_BUCKET_NAME
+          resources:
+            requests:
+              cpu: "2000m"
+              memory: "8Gi"
+              nvidia.com/gpu: "1"
+            limits:
+              cpu: "8000m"
+              memory: "24Gi"
+              nvidia.com/gpu: "1"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 120  # Model loading takes time
+            periodSeconds: 30
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 90
+            periodSeconds: 15
+          volumeMounts:
+            - name: model-cache
+              mountPath: /root/.cache/huggingface
+      volumes:
+        - name: model-cache
+          persistentVolumeClaim:
+            claimName: gpu-model-cache
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gpu-model-cache
+  namespace: storyweave
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi  # HuggingFace models are large
+  storageClassName: gp3  # AWS EBS gp3 — adjust for your cloud
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gpu-server-service
+  namespace: storyweave
+spec:
+  selector:
+    app: gpu-server
+  ports:
+    - port: 8000
+      targetPort: 8000
+      name: http

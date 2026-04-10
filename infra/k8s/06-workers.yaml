@@ -1,0 +1,61 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workers
+  namespace: storyweave
+  labels:
+    app: workers
+    app.kubernetes.io/part-of: storyweave
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: workers
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: workers
+    spec:
+      # Allow drain time for active BullMQ jobs
+      terminationGracePeriodSeconds: 120
+      containers:
+        - name: workers
+          image: <ECR_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/storyweave/workers:latest
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: storyweave-config
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: storyweave-secrets
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: storyweave-secrets
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: S3_BUCKET_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: storyweave-secrets
+                  key: S3_BUCKET_NAME
+            - name: GPU_SERVER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: storyweave-secrets
+                  key: GPU_SERVER_API_KEY
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "2000m"
+              memory: "2Gi"

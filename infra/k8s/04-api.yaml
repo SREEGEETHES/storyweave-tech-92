@@ -1,0 +1,111 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: storyweave
+  labels:
+    app: api
+    app.kubernetes.io/part-of: storyweave
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: api
+          image: <ECR_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/storyweave/api:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3001
+              name: http
+          envFrom:
+            - configMapRef:
+                name: storyweave-config
+          env:
+            - name: PORT
+              value: "3001"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: storyweave-secrets
+                  key: JWT_SECRET
+            - name: NEON_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: storyweave-secrets
+                  key: NEON_DATABASE_URL
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: storyweave-secrets
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: storyweave-secrets
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: S3_BUCKET_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: storyweave-secrets
+                  key: S3_BUCKET_NAME
+            - name: REMOTION_LAMBDA_FUNCTION_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: storyweave-secrets
+                  key: REMOTION_LAMBDA_FUNCTION_NAME
+            - name: REMOTION_SERVE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: storyweave-secrets
+                  key: REMOTION_SERVE_URL
+            - name: RENDER_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: storyweave-secrets
+                  key: RENDER_WEBHOOK_SECRET
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-service
+  namespace: storyweave
+spec:
+  selector:
+    app: api
+  ports:
+    - port: 3001
+      targetPort: 3001
+      name: http
