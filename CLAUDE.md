@@ -17,7 +17,7 @@ The core logic relies on generating a structured `VideoState` object, which is t
 
 ### The Dual-Path Generation & Hybrid Editor:
 - **Direct Mode**: The user inputs a topic and selects a voice. The AI generates the script, image prompts, and timings from scratch.
-- **DNA (Style-Match) Mode**: *[Optional]* The user uploads a reference video. The backend extracts a DNA JSON. The user provides a new topic, and the AI generates assets matching the DNA pacing.
+- **DNA (Style-Match) Mode (Vibe Coding)**: *[Optional]* The user uploads a reference video (up to 100MB). Utilizing **Kimi K2.5**'s native multimodal vision-to-code capabilities, the backend extracts a Video DNA JSON representing the pacing, cuts, and transitions. The user provides a new topic, and Kimi generates assets matching the exact vibe.
 - **The Manual Editor**: Regardless of AI generation, the frontend must feature a full manual video editor (inspired by github: `designcombo/react-video-editor` and `remotion editor starter`). The editor must support multi-track timelines, drag & drop, S3 pre-signed upload assets, rolling edits, undo/redo history, and a composition inspector.
 
 ---

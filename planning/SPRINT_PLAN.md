@@ -1,7 +1,7 @@
 # StoryWeave Build Roadmap: 48-Hour Sprint
 
 **Goal**: Build the "Plug & Play" Video SaaS Engine.
-**Target Status**: Ready for Kimi/MiniMax keys by EOD tomorrow.
+**Target Status**: Ready for Kimi/MiniMax keys.
 
 ## 🛠️ Sprint 1: Setup & Data State
 - [ ] Install Claude MCP Plugins (`frontend-design`, `superpowers`) to enforce UI/UX consistency.
@@ -53,6 +53,3 @@
 - [ ] Add **Automated B-Roll Sourcing**: Agent analyzes script and suggests matching Vault clips.
 - [ ] Build **Audio Extraction Utility**: One-click "Detach Audio" from video clips to new tracks.
 - [ ] **Variation Engine**: Generate 3 AI script/visual variants and let user "Remix" the best parts.
-
----
-*Agent Instruction: Pick the top task, build it fully, then check it off.*

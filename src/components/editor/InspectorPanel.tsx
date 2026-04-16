@@ -8,7 +8,7 @@
  * which records the action to the undo history.
  */
 import React, { useCallback } from 'react';
-import { AlignCenter, AlignLeft, AlignRight, AlignVerticalJustifyCenter, AlignBottom, AlignTop } from 'lucide-react';
+import { AlignCenter, AlignLeft, AlignRight, AlignVerticalJustifyCenter, AlignVerticalJustifyStart, AlignVerticalJustifyEnd } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
@@ -64,6 +64,7 @@ function SliderRow({ label, value, min = 0, max = 100, step = 1, onChange }: {
 
 export function InspectorPanel() {
   const { tracks, selectedClipIds, updateClipProps } = useEditor();
+  const fps = 30; // Default FPS for fade slider max
 
   // Find the first selected clip
   const selectedClip: TimelineClip | undefined = (() => {
@@ -161,9 +162,9 @@ export function InspectorPanel() {
                   { icon: <AlignLeft size={12} />, label: 'Left',   action: () => update({ x: 0 }) },
                   { icon: <AlignCenter size={12} />, label: 'Center H', action: () => update({ x: 960 }) },
                   { icon: <AlignRight size={12} />, label: 'Right',  action: () => update({ x: 1920 }) },
-                  { icon: <AlignTop size={12} />, label: 'Top',    action: () => update({ y: 0 }) },
+                  { icon: <AlignVerticalJustifyStart size={12} />, label: 'Top',    action: () => update({ y: 0 }) },
                   { icon: <AlignVerticalJustifyCenter size={12} />, label: 'Center V', action: () => update({ y: 540 }) },
-                  { icon: <AlignBottom size={12} />, label: 'Bottom', action: () => update({ y: 1080 }) },
+                  { icon: <AlignVerticalJustifyEnd size={12} />, label: 'Bottom', action: () => update({ y: 1080 }) },
                 ].map(btn => (
                   <Button key={btn.label} variant="outline" size="sm"
                     className="h-7 w-7 p-0 border-zinc-700 bg-zinc-800"
