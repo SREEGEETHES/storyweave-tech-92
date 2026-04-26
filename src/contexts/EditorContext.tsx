@@ -114,6 +114,9 @@ interface EditorContextValue {
 
   // ── Load from VideoState ──────────────────────────────────────────────
   loadFromVideoState: (vs: VideoState) => void;
+
+  // ── Audio extraction ──────────────────────────────────────────────
+  extractAudioFromVideo: (videoClipId: string) => void;
 }
 
 const EditorContext = createContext<EditorContextValue | undefined>(undefined);
@@ -502,6 +505,45 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     }
   }, [videoState, loadFromVideoState]);
 
+  // ── Audio extraction (detach audio from video to new track) ────────
+  const extractAudioFromVideo = useCallback((videoClipId: string) => {
+    commit('Extract audio', prev => {
+      let videoClip: TimelineClip | undefined;
+      let sourceTrack: TimelineTrack | undefined;
+      
+      for (const track of prev) {
+        const clip = track.clips.find(c => c.id === videoClipId);
+        if (clip && (track.type === 'video')) {
+          videoClip = { ...clip };
+          sourceTrack = track;
+          break;
+        }
+      }
+      
+      if (!videoClip || !sourceTrack) return prev;
+      
+      const voiceTrack = prev.find(t => t.type === 'voiceover');
+      if (!voiceTrack) return prev;
+      
+      const newAudioClip: TimelineClip = {
+        ...videoClip,
+        id: genId(),
+        trackId: voiceTrack.id,
+        type: 'voiceover',
+        name: `Audio from ${videoClip.name}`,
+        startFrame: videoClip.startFrame,
+        durationInFrames: videoClip.durationInFrames,
+      };
+      
+      return prev.map(tr => {
+        if (tr.id === voiceTrack.id) {
+          return { ...tr, clips: [...tr.clips, newAudioClip].sort((a, b) => a.startFrame - b.startFrame) };
+        }
+        return tr;
+      });
+    });
+  }, [commit]);
+
   const value: EditorContextValue = {
     tracks, selectedClipIds, playheadFrame, isPlaying, toolMode,
     zoomLevel, scrollX, fps, totalDurationInFrames, snapEnabled, marquee,
@@ -515,6 +557,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     getSnapPoints, snapFrame,
     undo, redo,
     loadFromVideoState,
+    extractAudioFromVideo,
   };
 
   return <EditorContext.Provider value={value}>{children}</EditorContext.Provider>;

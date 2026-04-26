@@ -11,9 +11,9 @@
  * │  (18%)       │ (52%)                        │ (22%)           │
  * ├──────────────┴──────────────────────────────┴─────────────────┤
  * │ MultiTrackTimeline  (38% default, resizable)                  │
- * └────────────────────────────────────────────────────────────────┘
+ * └───────────���────────────────────────────────────────────────────┘
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -27,15 +27,34 @@ import { PreviewCanvas } from '@/components/editor/PreviewCanvas';
 import { InspectorPanel } from '@/components/editor/InspectorPanel';
 import { MediaLibrary } from '@/components/editor/MediaLibrary';
 import { RenderProgress } from '@/components/editor/RenderProgress';
+import { VaultTerminal } from '@/components/editor/VaultTerminal';
+import { CommandBar } from '@/components/editor/CommandBar';
+import { VariationEngine } from '@/components/editor/VariationEngine';
+import { AutoBRollSourcing } from '@/components/editor/AutoBRollSourcing';
 import { useVideoState } from '@/contexts/VideoStateContext';
 
 function EditorLayout() {
   const { videoState } = useVideoState();
   const [showRenderModal, setShowRenderModal] = useState(false);
+  const [showVault, setShowVault] = useState(false);
+  const [showCommandBar, setShowCommandBar] = useState(false);
+  const [showVariationEngine, setShowVariationEngine] = useState(false);
+  const [showAutoBRoll, setShowAutoBRoll] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setShowCommandBar(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <div className="flex flex-col h-screen bg-zinc-950 overflow-hidden">
-      {/* Render progress modal */}
+      {/* Modals */}
       {showRenderModal && videoState && (
         <RenderProgress
           videoState={videoState}
@@ -43,8 +62,19 @@ function EditorLayout() {
         />
       )}
 
+      <VaultTerminal open={showVault} onOpenChange={setShowVault} />
+      <CommandBar open={showCommandBar} onOpenChange={setShowCommandBar} />
+      <VariationEngine open={showVariationEngine} onOpenChange={setShowVariationEngine} />
+      <AutoBRollSourcing open={showAutoBRoll} onOpenChange={setShowAutoBRoll} />
+
       {/* Top toolbar */}
-      <EditorHeader onRenderClick={() => setShowRenderModal(true)} />
+      <EditorHeader 
+        onRenderClick={() => setShowRenderModal(true)} 
+        onVaultClick={() => setShowVault(true)}
+        onCommandBarClick={() => setShowCommandBar(true)}
+        onVariationClick={() => setShowVariationEngine(true)}
+        onAutoBRollClick={() => setShowAutoBRoll(true)}
+      />
 
       {/* Main body — vertical split: upper workspace / lower timeline */}
       <ResizablePanelGroup direction="vertical" className="flex-1 min-h-0">

@@ -140,5 +140,6 @@ export interface VideoState {
         visualType: 'image' | 'video' | 'gif';
         visualUrl: string; // Seedream image / Tenor GIF URL
         kenBurnsEffect?: boolean;
+        kenBurnsDirection?: 'zoom_in' | 'zoom_out' | 'pan_left' | 'pan_right';
     }[];
 }

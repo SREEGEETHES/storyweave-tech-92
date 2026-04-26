@@ -243,6 +243,48 @@ export async function cancelScheduledPost(postId: string): Promise<void> {
     if (error) throw error;
 }
 
+/** Retries a failed post by resetting its status and re-attempting publish. */
+export async function retryPost(postId: string): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+
+    const { data: post, error: fetchError } = await supabase
+        .from("scheduled_posts")
+        .select("*")
+        .eq("id", postId)
+        .single();
+
+    if (fetchError) throw fetchError;
+    if (!post) throw new Error("Post not found");
+    if (post.status !== "failed") throw new Error("Only failed posts can be retried");
+
+    const results = await publishNow({
+        videoUrl: post.video_url,
+        caption: post.caption,
+        title: post.idea,
+        platforms: post.platforms,
+    });
+
+    const allSuccess = results.every(r => r.success);
+    const anySuccess = results.some(r => r.success);
+    const publishResult = Object.fromEntries(results.map(r => [r.platform, r.post_id ?? r.error ?? ""]));
+    const errorMsg = results.filter(r => !r.success).map(r => `${r.platform}: ${r.error}`).join("; ") || null;
+
+    const { error: updateError } = await supabase
+        .from("scheduled_posts")
+        .update({
+            status: anySuccess ? "published" : "failed",
+            published_at: anySuccess ? new Date().toISOString() : null,
+            publish_result: publishResult,
+            error_message: errorMsg,
+            retry_count: (post.retry_count ?? 0) + 1,
+        })
+        .eq("id", postId);
+
+    if (updateError) throw updateError;
+    if (!anySuccess) throw new Error(errorMsg);
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /** Checks whether a platform token is likely still valid (client-side only). */

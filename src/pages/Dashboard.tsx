@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import {
   Dialog,
   DialogContent,
@@ -92,6 +93,43 @@ const Dashboard = () => {
       return () => clearInterval(interval);
     }
   }, [user, stats?.generations, refetch]);
+
+  // Real-time progress subscription
+  const [progressUpdates, setProgressUpdates] = useState<Record<string, { message: string; percent: number }>>({});
+  
+  useEffect(() => {
+    if (!user) return;
+    
+    const channel = supabase.channel('generation-progress')
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'generations',
+        filter: `user_id=eq.${user.id}`
+      }, (payload) => {
+        const gen = payload.new as any;
+        if (gen.status === 'processing' && gen.progress_percent !== null) {
+          setProgressUpdates(prev => ({
+            ...prev,
+            [gen.id]: {
+              message: gen.status_message || 'Processing...',
+              percent: gen.progress_percent || 0
+            }
+          }));
+          // Refetch when complete
+          if (gen.progress_percent === 100 || gen.status === 'completed') {
+            refetch();
+          }
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, refetch]);
+
+  const getProgress = (genId: string) => progressUpdates[genId];
 
   const handleEditProfile = () => {
     toast.info("Profile editing coming soon!");
@@ -233,9 +271,18 @@ const Dashboard = () => {
                             </div>
                           </div>
                         ) : gen.status === 'processing' ? (
-                          <div className="aspect-video bg-muted flex flex-col items-center justify-center">
-                            <Clock className="w-12 h-12 text-primary animate-pulse mb-2" />
-                            <p className="text-sm text-muted-foreground">Processing...</p>
+                          <div className="aspect-video bg-muted flex flex-col items-center justify-center p-4">
+                            {getProgress(gen.id) ? (
+                              <>
+                                <Progress value={getProgress(gen.id).percent} className="w-full mb-2" />
+                                <p className="text-sm text-primary text-center">{getProgress(gen.id).message}</p>
+                              </>
+                            ) : (
+                              <>
+                                <Clock className="w-12 h-12 text-primary animate-pulse mb-2" />
+                                <p className="text-sm text-muted-foreground">Processing...</p>
+                              </>
+                            )}
                           </div>
                         ) : (
                           <div className="aspect-video bg-destructive/10 flex flex-col items-center justify-center">

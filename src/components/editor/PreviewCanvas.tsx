@@ -69,15 +69,29 @@ export function PreviewCanvas() {
       }
       const img = imgCache.current.get(src);
       if (img?.complete && img.naturalWidth > 0) {
-        // Ken Burns: slow zoom
+        // Ken Burns: animated camera motion
         let scale = 1;
+        let offsetX = 0;
+        let offsetY = 0;
+        
         if (activeScene.kenBurnsEffect) {
           const progress = (playheadFrame - activeScene.startFrame) / activeScene.durationInFrames;
+          const direction = activeScene.kenBurnsDirection || 'zoom_in';
+          
+          // Apply motion based on direction
           scale = 1 + progress * 0.08;
+          
+          if (direction === 'zoom_out') {
+            scale = 1.08 - progress * 0.08;
+          } else if (direction === 'pan_left') {
+            offsetX = -progress * 50;
+          } else if (direction === 'pan_right') {
+            offsetX = progress * 50;
+          }
         }
         const sw = W * scale;
         const sh = H * scale;
-        ctx.drawImage(img, (W - sw) / 2, (H - sh) / 2, sw, sh);
+        ctx.drawImage(img, (W - sw) / 2 + offsetX, (H - sh) / 2 + offsetY, sw, sh);
       } else {
         ctx.fillStyle = '#1c1c2e';
         ctx.fillRect(0, 0, W, H);

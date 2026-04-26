@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { ArrowLeft, Upload, Wand2, X, Video } from "lucide-react";
+import { ArrowLeft, Upload, Wand2, X, Video, Palette, Settings2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useUser } from "@/contexts/UserContext";
@@ -13,11 +14,17 @@ import { useUser } from "@/contexts/UserContext";
 const CustomStyleCreator = () => {
   const navigate = useNavigate();
   const { user } = useUser();
+  const [activeTab, setActiveTab] = useState<"clone" | "manual">("clone");
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     referenceVideo: null as File | null,
     youtubeUrl: ""
+  });
+  const [manualConfig, setManualConfig] = useState({
+    fontName: "Inter",
+    primaryColor: "#6366f1",
+    cutFrequency: "medium"
   });
   const [generatedStyle, setGeneratedStyle] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -147,6 +154,38 @@ const CustomStyleCreator = () => {
     }
   };
 
+  const handleSaveManualStyle = async () => {
+    if (!user) {
+      toast.error("You must be logged in to save a style.");
+      return;
+    }
+
+    try {
+      const config = {
+        manual: true,
+        font: manualConfig.fontName,
+        primaryColor: manualConfig.primaryColor,
+        cutFrequency: manualConfig.cutFrequency
+      };
+
+      const { error } = await supabase
+        .from('styles')
+        .insert({
+          name: formData.name,
+          description: formData.description,
+          config,
+          user_id: user.id
+        });
+
+      if (error) throw error;
+
+      toast.success("Style saved!");
+      navigate('/features#idea-to-video');
+    } catch (error: any) {
+      toast.error("Failed to save style: " + error.message);
+    }
+  };
+
   if (generatedStyle) {
     return (
       <div className="min-h-screen bg-background p-4">
@@ -242,112 +281,168 @@ const CustomStyleCreator = () => {
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <h1 className="text-2xl font-bold">Cloning Style DNA</h1>
+            <h1 className="text-2xl font-bold">Create Style</h1>
           </div>
         </div>
 
-        {/* Input Method Tabs */}
-        <div className="space-y-4 mb-6">
-          <Card className="glass">
-            <CardContent className="p-6">
-              <Label htmlFor="youtube">YouTube URL</Label>
-              <div className="flex gap-2 mt-2">
-                <Input
-                  id="youtube"
-                  placeholder="https://youtube.com/watch?v=..."
-                  value={formData.youtubeUrl}
-                  onChange={(e) => setFormData({ ...formData, youtubeUrl: e.target.value, referenceVideo: null })}
-                />
-              </div>
-              <div className="relative my-6 text-center">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-white/10"></div>
+        {/* Mode Tabs */}
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="space-y-4 mb-6">
+          <TabsList className="grid grid-cols-2 w-full max-w-md">
+            <TabsTrigger value="clone" className="gap-2">
+              <Palette className="w-4 h-4" />
+              Clone from Video
+            </TabsTrigger>
+            <TabsTrigger value="manual" className="gap-2">
+              <Settings2 className="w-4 h-4" />
+              Manual Config
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Clone Tab */}
+          <TabsContent value="clone">
+            <Card className="glass">
+              <CardContent className="p-6 space-y-6">
+                <Label htmlFor="youtube">YouTube URL</Label>
+                <div className="flex gap-2 mt-2">
+                  <Input
+                    id="youtube"
+                    placeholder="https://youtube.com/watch?v=..."
+                    value={formData.youtubeUrl}
+                    onChange={(e) => setFormData({ ...formData, youtubeUrl: e.target.value, referenceVideo: null })}
+                  />
                 </div>
-                <span className="relative bg-background px-2 text-xs text-muted-foreground">OR</span>
-              </div>
-              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center bg-white/5">
-                <div className="flex flex-col items-center space-y-4">
-                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                    <Upload className="h-5 w-5 text-muted-foreground" />
+                <div className="relative my-6 text-center">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-white/10"></div>
                   </div>
-                  <div>
+                  <span className="relative bg-background px-2 text-xs text-muted-foreground">OR</span>
+                </div>
+                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center bg-white/5">
+                  <div className="flex flex-col items-center space-y-4">
+                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                      <Upload className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <input
+                        type="file"
+                        accept="video/*"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                        id="file-upload"
+                      />
+                      <Label
+                        htmlFor="file-upload"
+                        className="text-primary hover:text-primary/80 cursor-pointer text-sm"
+                      >
+                        Upload a local video
+                      </Label>
+                      <p className="text-[10px] text-muted-foreground mt-1">MP4, MOV up to 50MB</p>
+                    </div>
+                    {formData.referenceVideo && (
+                      <p className="text-sm text-primary flex items-center gap-2">
+                        <Video className="w-4 h-4" />
+                        {formData.referenceVideo.name}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Manual Tab */}
+          <TabsContent value="manual">
+            <Card className="glass">
+              <CardContent className="p-6 space-y-6">
+                <div>
+                  <Label>Style Name</Label>
+                  <Input
+                    placeholder="My Custom Style"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <Label>Typography Font</Label>
+                  <Input
+                    placeholder="e.g., Inter, Roboto, Playfair Display"
+                    value={manualConfig.fontName}
+                    onChange={(e) => setManualConfig({ ...manualConfig, fontName: e.target.value })}
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <Label>Primary Color</Label>
+                  <div className="flex items-center gap-4 mt-2">
                     <input
-                      type="file"
-                      accept="video/*"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                      id="file-upload"
+                      type="color"
+                      value={manualConfig.primaryColor}
+                      onChange={(e) => setManualConfig({ ...manualConfig, primaryColor: e.target.value })}
+                      className="w-16 h-10 rounded border cursor-pointer"
                     />
-                    <Label
-                      htmlFor="file-upload"
-                      className="text-primary hover:text-primary/80 cursor-pointer text-sm"
-                    >
-                      Upload a local video
-                    </Label>
-                    <p className="text-[10px] text-muted-foreground mt-1">MP4, MOV up to 50MB</p>
+                    <Input
+                      value={manualConfig.primaryColor}
+                      onChange={(e) => setManualConfig({ ...manualConfig, primaryColor: e.target.value })}
+                      className="flex-1"
+                    />
                   </div>
-                  {formData.referenceVideo && (
-                    <p className="text-sm text-primary flex items-center gap-2">
-                      <Video className="w-4 h-4" />
-                      {formData.referenceVideo.name}
-                    </p>
-                  )}
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
 
-        {/* Form Fields */}
-        <Card className="glass mb-6">
-          <CardContent className="p-6 space-y-6">
-            <div>
-              <Label htmlFor="name">Style Name (required)</Label>
-              <Input
-                id="name"
-                placeholder="e.g., Apple Cinematic, MrBeast Fast-Paced"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="mt-1"
-              />
-            </div>
+                <div>
+                  <Label>Cut Frequency / Pacing</Label>
+                  <div className="grid grid-cols-3 gap-2 mt-2">
+                    {["fast", "medium", "slow"].map((freq) => (
+                      <button
+                        key={freq}
+                        type="button"
+                        onClick={() => setManualConfig({ ...manualConfig, cutFrequency: freq })}
+                        className={`p-3 rounded-lg border text-sm font-medium capitalize transition-all ${
+                          manualConfig.cutFrequency === freq
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border text-muted-foreground hover:border-primary/50"
+                        }`}
+                      >
+                        {freq}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-            <div>
-              <Label htmlFor="description">Additional Notes</Label>
-              <Textarea
-                id="description"
-                placeholder="Anything specific about the style we should pay attention to?"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="mt-1 min-h-[100px]"
-              />
-            </div>
-          </CardContent>
-        </Card>
+<div>
+                  <Label>Style Name</Label>
+                  <Input
+                    placeholder="My Custom Style"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value})}
+                  />
+                </div>
 
-        {/* Generate Button */}
-        <Button
-          onClick={handleGenerateStyle}
-          disabled={isGenerating || isUploading || !formData.name.trim()}
-          className="w-full h-12 text-lg bg-gradient-premium hover:shadow-lg hover:shadow-primary/25 transition-all"
-        >
-          {isUploading ? (
-            <>
-              <Upload className="h-5 w-5 mr-2 animate-bounce" />
-              Uploading...
-            </>
-          ) : isGenerating ? (
-            <>
-              <Wand2 className="h-5 w-5 mr-2 animate-pulse" />
-              Scanning Video DNA...
-            </>
-          ) : (
-            <>
-              <Wand2 className="h-5 w-5 mr-2" />
-              Analyze Video DNA
-            </>
-          )}
-        </Button>
+                <div>
+                  <Label>Description</Label>
+                  <Textarea
+                    placeholder="Describe your style..."
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value})}
+                  />
+                </div>
+
+{(generatedStyle || activeTab === "clone") && (
+                  <Button
+                    onClick={handleSaveStyle}
+                    disabled={!generatedStyle || !formData.name.trim()}
+                    className="w-full"
+                  >
+                    <Wand2 className="w-4 h-4 mr-2" />
+                    Save Style DNA
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

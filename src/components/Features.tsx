@@ -38,7 +38,7 @@ const Features = () => {
       id: "editor",
       icon: Edit3,
       title: "Video Editing Suite",
-      description: "Drag-and-drop editor with trim, merge, overlays, captions, and mirror effects. Professional editing made simple.",
+      description: "Multi-track timeline with precision trimming, layered overlays, auto-captions, and motion effects. Full creative control.",
       highlight: "Intuitive Editing"
     },
     {

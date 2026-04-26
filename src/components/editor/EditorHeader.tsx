@@ -16,7 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Undo2, Redo2, Scissors, MousePointer2,
   Type, Hand, Magnet, ZoomIn, ZoomOut, Download,
-  Sparkles, Save, Loader2,
+  Sparkles, Save, Loader2, Command, Folder, Wand2, Film,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -43,9 +43,19 @@ const TOOLS: ToolBtn[] = [
 
 interface EditorHeaderProps {
   onRenderClick?: () => void;
+  onVaultClick?: () => void;
+  onCommandBarClick?: () => void;
+  onVariationClick?: () => void;
+  onAutoBRollClick?: () => void;
 }
 
-export function EditorHeader({ onRenderClick }: EditorHeaderProps = {}) {
+export function EditorHeader({ 
+  onRenderClick, 
+  onVaultClick,
+  onCommandBarClick,
+  onVariationClick,
+  onAutoBRollClick,
+}: EditorHeaderProps = {}) {
   const navigate = useNavigate();
   const {
     toolMode, setToolMode,
@@ -183,6 +193,76 @@ export function EditorHeader({ onRenderClick }: EditorHeaderProps = {}) {
 
         {/* Spacer */}
         <div className="flex-1 min-w-2" />
+
+        {/* Vault */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 shrink-0"
+              onClick={onVaultClick}
+            >
+              <Folder size={13} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="text-xs">
+            Media Vault <span className="text-zinc-500 ml-1">(Ctrl+K)</span>
+          </TooltipContent>
+        </Tooltip>
+
+        {/* Auto B-Roll */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 shrink-0"
+              onClick={onAutoBRollClick}
+            >
+              <Film size={13} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="text-xs">
+            Auto B-Roll
+          </TooltipContent>
+        </Tooltip>
+
+        {/* Variation Engine */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 shrink-0"
+              onClick={onVariationClick}
+            >
+              <Wand2 size={13} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="text-xs">
+            Variation Engine
+          </TooltipContent>
+        </Tooltip>
+
+        {/* Command Bar */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 shrink-0"
+              onClick={onCommandBarClick}
+            >
+              <Command size={13} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="text-xs">
+            Command Bar <span className="text-zinc-500 ml-1">(Ctrl+K)</span>
+          </TooltipContent>
+        </Tooltip>
+
+        <Separator orientation="vertical" className="h-5 bg-zinc-700 shrink-0" />
 
         {/* AI Generate */}
         <Button

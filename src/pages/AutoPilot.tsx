@@ -32,6 +32,7 @@ import {
     schedulePost,
     getScheduledPosts,
     cancelScheduledPost,
+    retryPost,
     isTokenFresh,
     PLATFORM_META,
     type SchedulePostOptions,
@@ -340,7 +341,7 @@ function PlatformConnectButton({ platform, onConnect }: { platform: SocialPlatfo
 
 // ─── Post Card ────────────────────────────────────────────────────────────────
 
-function PostCard({ post, onCancel }: { post: ScheduledPost; onCancel: (id: string) => void }) {
+function PostCard({ post, onCancel, onRetry }: { post: ScheduledPost; onCancel: (id: string) => void; onRetry: (id: string) => void }) {
     const publishedPlatforms = post.platforms ?? [];
 
     return (
@@ -403,6 +404,16 @@ function PostCard({ post, onCancel }: { post: ScheduledPost; onCancel: (id: stri
                             onClick={() => onCancel(post.id)}
                         >
                             <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                    )}
+                    {post.status === "failed" && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-muted-foreground hover:text-green-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => onRetry(post.id)}
+                        >
+                            <RefreshCw className="w-3.5 h-3.5" />
                         </Button>
                     )}
                 </div>
@@ -474,6 +485,15 @@ const AutoPilot = () => {
         mutationFn: cancelScheduledPost,
         onSuccess: () => {
             toast({ title: "Post cancelled" });
+            queryClient.invalidateQueries({ queryKey: ["scheduled-posts"] });
+        },
+        onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+    });
+
+    const retryPostMutation = useMutation({
+        mutationFn: retryPost,
+        onSuccess: () => {
+            toast({ title: "Post retried" });
             queryClient.invalidateQueries({ queryKey: ["scheduled-posts"] });
         },
         onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
@@ -655,6 +675,7 @@ const AutoPilot = () => {
                                         key={post.id}
                                         post={post}
                                         onCancel={id => cancelPostMutation.mutate(id)}
+                                        onRetry={id => retryPostMutation.mutate(id)}
                                     />
                                 ))}
                             </TabsContent>

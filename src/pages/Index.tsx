@@ -98,7 +98,7 @@ const Index = () => {
                 </h2>
 
                 <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed font-light">
-                  Clone editing styles (like Zack D.), automate your faceless channel, and dominate social media algorithmically.
+                  AI-powered video creation with precise control over every frame. Generate, edit, and publish seamlessly.
                 </p>
               </div>
 

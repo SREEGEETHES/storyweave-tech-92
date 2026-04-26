@@ -192,4 +192,68 @@ export const socialRoutes = async (fastify: FastifyInstance) => {
         if (error) throw error;
         return { success: true };
     });
+
+    // POST /social/refresh-tokens — refresh expiring tokens
+    fastify.post('/refresh-tokens', { preValidation: [fastify.authenticate] }, async (request: any) => {
+        const userId = request.user.id;
+        const supabase = getSupabase();
+
+        // Fetch accounts expiring within 24 hours
+        const expiringSoon = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+        
+        const { data: accounts, error } = await supabase
+            .from('social_accounts')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('is_active', true)
+            .or(`token_expires_at.lte.${expiringSoon},token_expires_at.is.null`);
+        
+        if (error || !accounts?.length) {
+            return { refreshed: 0, message: 'No tokens to refresh' };
+        }
+
+        let refreshed = 0;
+        let failed = 0;
+
+        for (const account of accounts) {
+            if (!account.refresh_token) {
+                // Mark as expired if no refresh token
+                await supabase
+                    .from('social_accounts')
+                    .update({ is_active: false, updated_at: new Date().toISOString() })
+                    .eq('id', account.id);
+                failed++;
+                continue;
+            }
+
+            try {
+                // Token refresh logic per platform
+                let newAccessToken: string | null = null;
+                // Note: Platform-specific refresh logic would go here
+                // For now, we'll mark as needs reconnecting
+                
+                if (!newAccessToken) {
+                    await supabase
+                        .from('social_accounts')
+                        .update({ is_active: false, updated_at: new Date().toISOString() })
+                        .eq('id', account.id);
+                    failed++;
+                } else {
+                    await supabase
+                        .from('social_accounts')
+                        .update({
+                            access_token: newAccessToken,
+                            updated_at: new Date().toISOString(),
+                        })
+                        .eq('id', account.id);
+                    refreshed++;
+                }
+            } catch (err) {
+                console.error(`Token refresh failed for ${account.platform}:`, err);
+                failed++;
+            }
+        }
+
+        return { refreshed, failed, message: failed > 0 ? 'Some accounts require re-linking' : 'Tokens refreshed' };
+    });
 };

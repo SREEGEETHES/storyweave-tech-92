@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { containsRestrictedContent } from "@/utils/moderation";
 import {
   Wand2,
   Users,
@@ -175,6 +176,8 @@ const Features = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedStyleDetails, setSelectedStyleDetails] = useState(null);
   const [referenceFile, setReferenceFile] = useState<File | null>(null);
+  const [customMusicFile, setCustomMusicFile] = useState<File | null>(null);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const { toast } = useToast();
   useEffect(() => {
     const savedFormData = JSON.parse(localStorage.getItem('videoFormData') || '{}');
@@ -205,7 +208,7 @@ const Features = () => {
         description: "Please log in to generate videos",
         variant: "destructive",
       });
-      navigate('/login');
+navigate('/login');
       return;
     }
 
@@ -213,6 +216,26 @@ const Features = () => {
       toast({
         title: "Missing Idea",
         description: "Please describe your video idea first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!termsAccepted) {
+      toast({
+        title: "Terms Required",
+        description: "Please accept the Terms of Service",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Content Safety Check
+    const moderation = containsRestrictedContent(videoIdea);
+    if (moderation.isRestricted) {
+      toast({
+        title: "Content Restricted",
+        description: `Your prompt contains: ${moderation.matchedKeywords.join(', ')}. Please modify.`,
         variant: "destructive",
       });
       return;
@@ -445,7 +468,7 @@ const Features = () => {
 
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
-              <Card className="glass">
+<Card className="glass backdrop-blur-xl bg-black/40 border border-white/10 shadow-[0_0_50px_-12px_rgba(139,92,246,0.3)]">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="w-5 h-5 text-primary" />
@@ -458,34 +481,76 @@ const Features = () => {
                     <Textarea
                       id="idea"
                       placeholder="A product demonstration showing our new smartphone..."
-                      className="min-h-[100px]"
+                      className="min-h-[100px] bg-black/20 border-white/10 focus:border-primary/50 transition-all hover:scale-[1.005]"
                       value={videoIdea}
                       onChange={(e) => setVideoIdea(e.target.value)}
                     />
                   </div>
 
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="file"
-                        id="reference-upload"
-                        className="hidden"
-                        onChange={handleFileChange}
-                        accept="image/*,.pdf,.doc,.docx,.txt"
-                      />
-                      <Label
-                        htmlFor="reference-upload"
-                        className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 gap-2"
-                      >
-                        <Upload className="w-4 h-4" />
-                        {referenceFile ? "Change File" : "Upload Reference"}
-                      </Label>
-                      {referenceFile && (
-                        <span className="text-sm text-muted-foreground truncate max-w-[150px]">
-                          {referenceFile.name}
-                        </span>
-                      )}
+                  <div>
+                    <Label className="text-xs text-muted-foreground mb-2 block">Upload Media (Optional)</Label>
+                    <div className="flex gap-4">
+                      <div className="flex items-center gap-2 flex-1">
+                        <Input
+                          type="file"
+                          id="reference-upload"
+                          className="hidden"
+                          onChange={handleFileChange}
+                          accept="image/*,.pdf,.doc,.docx,.txt"
+                        />
+                        <Label
+                          htmlFor="reference-upload"
+                          className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 gap-2 w-full"
+                        >
+                          <Upload className="w-4 h-4" />
+                          {referenceFile ? "Change" : "Upload Reference"}
+                        </Label>
+                        {referenceFile && (
+                          <span className="text-sm text-muted-foreground truncate max-w-[100px]">
+                            {referenceFile.name}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 flex-1">
+                        <Input
+                          type="file"
+                          id="music-upload"
+                          className="hidden"
+                          onChange={(e) => { if (e.target.files?.[0]) setCustomMusicFile(e.target.files[0]); toast({ title: "Music Selected", description: e.target.files[0].name }); }}
+                          accept="audio/*"
+                        />
+                        <Label
+                          htmlFor="music-upload"
+                          className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 gap-2 w-full"
+                        >
+                          <Upload className="w-4 h-4" />
+                          {customMusicFile ? "Change" : "Upload Local Music"}
+                        </Label>
+                        {customMusicFile && (
+                          <span className="text-sm text-muted-foreground truncate max-w-[100px]">
+                            {customMusicFile.name}
+                          </span>
+                        )}
+                      </div>
                     </div>
+                  </div>
+
+                  <div>
+                    <Label>AI Music Vibe (Optional)</Label>
+                    <Select defaultValue="">
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select music vibe" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="upbeat">Upbeat & Energetic</SelectItem>
+                        <SelectItem value="calm">Calm & Relaxing</SelectItem>
+                        <SelectItem value="dramatic">Dramatic</SelectItem>
+                        <SelectItem value="happy">Happy & Positive</SelectItem>
+                        <SelectItem value="sad">Sad & Melancholic</SelectItem>
+                        <SelectItem value="action">Action & Epic</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground mt-1">Priority will be given to Local Music if uploaded.</p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -531,6 +596,28 @@ const Features = () => {
                             {voice.name} - {voice.type}
                           </SelectItem>
                         ))}
+                        <SelectItem value="custom">Custom Voice (Upload)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label>Video Style</Label>
+                    <Select value={selectedStyle} onValueChange={setSelectedStyle}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose a style" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {myStyles.map((style: any) => (
+                          <SelectItem key={style.id} value={style.id}>
+                            {style.name} (My Style)
+                          </SelectItem>
+                        ))}
+                        {videoStyles.filter(s => s.id !== 'custom').map((style) => (
+                          <SelectItem key={style.id} value={style.id}>
+                            {style.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -552,11 +639,16 @@ const Features = () => {
                     </Select>
                   </div>
 
+                  <div className="flex items-center gap-2 pt-2">
+                    <input type="checkbox" id="terms" checked={termsAccepted} onChange={(e) => setTermsAccepted(e.target.checked)} className="w-4 h-4 rounded bg-black/20 border-white/10" />
+                    <label htmlFor="terms" className="text-xs text-muted-foreground cursor-pointer">I agree to the Terms of Service</label>
+                  </div>
+
                   <Button
-                    className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
+                    className="w-full relative overflow-hidden bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-600 hover:from-violet-500 hover:via-indigo-500 hover:to-violet-500 transition-all"
                     size="lg"
                     onClick={handleGenerateVideo}
-                    disabled={isGenerating}
+                    disabled={isGenerating || !termsAccepted}
                   >
                     {isGenerating ? (
                       <>

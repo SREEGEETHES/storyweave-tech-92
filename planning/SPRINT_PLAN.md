@@ -4,10 +4,10 @@
 **Target Status**: Ready for Kimi/MiniMax keys.
 
 ## 🛠️ Sprint 1: Setup & Data State
-- [ ] Install Claude MCP Plugins (`frontend-design`, `superpowers`) to enforce UI/UX consistency.
+- [x] Install Claude MCP Plugins (`frontend-design`, `superpowers`) to enforce UI/UX consistency.
 - [x] Define the `VideoState` JSON schema (The core engine DNA).
-- [ ] Set up **Neon (Serverless Postgres)** and link the `Projects`/`VideoDNA` tables.
-- [ ] Build the `VideoStateContext` to share data across the app.
+- [x] Set up **Neon (Serverless Postgres)** and link the `Projects`/`VideoDNA` tables.
+- [x] Build the `VideoStateContext` to share data across the app with save/load functionality.
 
 ## 🧠 Sprint 2: AI Factory 
 - [x] Write the Python/Node scripts for **Qwen3-TTS** and **ACE-Step 1.5** integration.
@@ -38,18 +38,19 @@
 - [x] Setup standard **CI/CD pipeline** (GitHub Actions) for automatic testing and deployment.
 
 ## 📱 Sprint 6: Social Media Auto-Publishing
-- [x] Integrate **Postiz** core publishing logic (Oauth for TikTok, Shorts, Instagram).
+- [x] Integrate Postiz core publishing logic (Oauth for TikTok, Shorts, Instagram).
 - [x] Build the "StoryWeave Publisher" UI (White-labeled, scheduled posting calendar).
 - [x] Wire the Remotion Lambda S3 output directly into the publishing queue.
+- [x] Implement Error Recovery (Retry Button) via Minimax.
 
 ## 🧠 Sprint 7: Media Vault & Smart Ingestion (The "Obsidian" Layer)
-- [ ] Setup `media_assets` table in Neon with full-text search.
-- [ ] Build **Smart Ingestion Pipeline**: Extract frames via `ffmpeg` + Auto-tag via Kimi K2.5.
-- [ ] Implement **Semantic Vault Search**: Search through thousands of personal clips with natural language.
-- [ ] Add the **Vault Terminal** to the Editor UI for instant B-roll importing.
+- [x] Setup `media_assets` table in Neon with full-text search.
+- [x] Build **Smart Ingestion Pipeline**: Extract frames via `ffmpeg` + Auto-tag via Kimi K2.5.
+- [x] Implement **Semantic Vault Search**: Search through thousands of personal clips with natural language.
+- [x] Add the **Vault Terminal** to the Editor UI for instant B-roll importing.
 
 ## ⚡ Sprint 8: Agentic Editor Powers (The "Hyper Edit" Layer)
-- [ ] Implement **Command Bar (Ctrl+K)**: Text-to-action commands (e.g., "/caption style:neon").
-- [ ] Add **Automated B-Roll Sourcing**: Agent analyzes script and suggests matching Vault clips.
-- [ ] Build **Audio Extraction Utility**: One-click "Detach Audio" from video clips to new tracks.
-- [ ] **Variation Engine**: Generate 3 AI script/visual variants and let user "Remix" the best parts.
+- [x] Implement **Command Bar (Ctrl+K)**: Text-to-action commands (e.g., "/caption style:neon").
+- [x] Add **Automated B-Roll Sourcing**: Agent analyzes script and suggests matching Vault clips.
+- [x] Build **Audio Extraction Utility**: One-click "Detach Audio" from video clips to new tracks.
+- [x] **Variation Engine**: Generate 3 AI script/visual variants and let user "Remix" the best parts.

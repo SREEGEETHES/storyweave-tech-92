@@ -56,6 +56,50 @@ export interface VideoSegment {
     duration: number;
 }
 
+export interface GenerationConfig {
+    /** DNA from selected style (cuts, colors, fonts, avg_shot_length) */
+    dna?: {
+        avg_shot_length?: number;
+        transitions?: string[];
+        color_palette?: string;
+        typography?: string;
+    };
+    /** Selected character info */
+    character?: {
+        name: string;
+        description: string;
+        imageUrl?: string;
+    };
+    /** Voice ID for TTS */
+    voiceId?: string;
+    /** Frame aspect ratio */
+    frameSize?: string;
+    /** Music vibe for BGM */
+    musicVibe?: 'cinematic' | 'lofi' | 'energetic' | 'sad' | 'corporate' | 'epic';
+    /** Custom uploaded music URL */
+    customMusicUrl?: string;
+    /** Generation ID for progress tracking */
+    generationId?: string;
+}
+
+// =========================================================================
+// Progress Tracking Helper
+// =========================================================================
+async function updateProgress(generationId: string, message: string, percent: number): Promise<void> {
+    if (!generationId) return;
+    try {
+        await supabase
+            .from('generations')
+            .update({ 
+                status_message: message,
+                progress_percent: percent
+            })
+            .eq('id', generationId);
+    } catch (err) {
+        console.warn('Progress update failed:', err);
+    }
+}
+
 export const aiService = {
 
     // =========================================================================
@@ -96,11 +140,29 @@ export const aiService = {
     // =========================================================================
     // 3a. Script Generation (Ollama via Supabase Edge Function)
     // =========================================================================
-    generateScript: async (topic: string): Promise<ScriptSegment[]> => {
+    generateScript: async (
+        topic: string,
+        config?: GenerationConfig
+    ): Promise<ScriptSegment[]> => {
         console.log("[Brain] Generating script for:", topic);
+        
+        const context = config?.character 
+            ? ` Feature ${config.character.name} described as ${config.character.description} in every scene description.` 
+            : '';
+        
+        const dnaNote = config?.dna?.avg_shot_length
+            ? ` Keep scenes to ${config.dna.avg_shot_length} seconds max (avg_shot_length from style DNA).`
+            : '';
+        
+        const fullPrompt = `${topic}. ${context} ${dnaNote}`;
+        
         try {
             const { data, error } = await supabase.functions.invoke('generate-script', {
-                body: { topic }
+                body: { 
+                    topic: fullPrompt,
+                    character: config?.character,
+                    dna: config?.dna
+                }
             });
             if (error) throw error;
             return data;
@@ -193,12 +255,23 @@ export const aiService = {
     generateVideoSegment: async (
         prompt: string,
         duration: number,
+        character?: { name: string; description: string; imageUrl?: string },
         options: { frameSize?: '16:9' | '9:16' | '1:1'; steps?: number; seed?: number } = {}
     ): Promise<VideoSegment> => {
-        console.log(`[Seedream] Generating image for: "${prompt.slice(0, 60)}"`);
+        // Inject character context for face consistency
+        let enhancedPrompt = prompt;
+        if (character?.name && character?.description) {
+            enhancedPrompt = `Featuring ${character.name}, a ${character.description}. Reference: ${character.imageUrl || 'no reference'}. ${prompt}`;
+        }
+        
+        console.log(`[Seedream] Generating image for: "${enhancedPrompt.slice(0, 80)}"`);
         try {
             const { data, error } = await supabase.functions.invoke('generate-visuals', {
-                body: { prompt, ...options }
+                body: { 
+                    prompt: enhancedPrompt, 
+                    characterImageUrl: character?.imageUrl,
+                    ...options 
+                }
             });
             if (error) throw error;
             return { url: data.url, duration };
@@ -215,20 +288,28 @@ export const aiService = {
     // =========================================================================
     generateVideo: async (
         prompt: string,
-        durationType: 'short' | 'long'
+        durationType: 'short' | 'long',
+        config?: GenerationConfig
     ): Promise<VideoState> => {
         const FPS = 30;
+        const dna = config?.dna;
+        const avgShotLength = dna?.avg_shot_length ?? 3;
+        const genId = config?.generationId;
+        
         console.log(`\n--- STORYWEAVE GENERATION STARTED (${durationType}) ---`);
+        console.log(`> Config: DNA avg_shot=${avgShotLength}s, frameSize=${config?.frameSize}, musicVibe=${config?.musicVibe}`);
 
-        // Step 1: Script
-        const scriptSegments = await aiService.generateScript(prompt);
+        // Step 1: Script with DNA/Character context (25%)
+        if (genId) await updateProgress(genId, 'Generating script...', 25);
+        const scriptSegments = await aiService.generateScript(prompt, config);
         console.log(`> Script: ${scriptSegments.length} segments`);
+        if (genId) await updateProgress(genId, 'Script generated', 25);
 
         const scenes: VideoState['scenes'] = [];
         const audioUrls: string[] = [];
         let currentFrame = 0;
 
-        // Step 2: Per-segment audio + visuals (audio-first: audio duration drives video)
+        // Step 2: Per-segment audio + visuals (50%)
         for (let i = 0; i < scriptSegments.length; i++) {
             const segment = scriptSegments[i];
             console.log(`\n[Segment ${i + 1}/${scriptSegments.length}]`);
@@ -239,8 +320,12 @@ export const aiService = {
 
             const durationInFrames = Math.round(audio.duration * FPS);
 
-            const image = await aiService.generateVideoSegment(segment.visualPrompt, audio.duration);
+            const image = await aiService.generateVideoSegment(segment.visualPrompt, audio.duration, config?.character);
             console.log(`  > Image: ${image.url}`);
+
+            // Randomize Ken Burns direction for visual variety
+            const kenBurnsDirections = ['zoom_in', 'zoom_out', 'pan_left', 'pan_right'];
+            const kenBurnsDirection = kenBurnsDirections[Math.floor(Math.random() * kenBurnsDirections.length)];
 
             scenes.push({
                 id: `scene_${i}`,
@@ -250,6 +335,7 @@ export const aiService = {
                 visualType: 'image',
                 visualUrl: image.url,
                 kenBurnsEffect: true,
+                kenBurnsDirection,
             });
 
             currentFrame += durationInFrames;
@@ -258,18 +344,34 @@ export const aiService = {
         const totalFrames = currentFrame;
         const totalDurationSeconds = totalFrames / FPS;
 
-        // Step 3: Background music for the whole video
-        console.log(`\n> Generating BGM (${totalDurationSeconds.toFixed(1)}s)…`);
-        const bgm = await aiService.generateBGM(
-            `${prompt} — cinematic background music`,
-            { duration: totalDurationSeconds, genre: 'cinematic', mood: 'neutral' }
-        );
-        console.log(`  > BGM: ${bgm.url}`);
+        // Step 3: Background music (only generate if custom music is NOT provided)
+        const musicVibe = config?.musicVibe ?? 'cinematic';
+        let bgmUrl = config?.customMusicUrl;
+
+        if (!bgmUrl) {
+            if (genId) await updateProgress(genId, 'Generating music...', 50);
+            console.log(`\n> Generating BGM (${totalDurationSeconds.toFixed(1)}s, vibe=${musicVibe})…`);
+            const bgm = await aiService.generateBGM(
+                `${prompt} — ${musicVibe} background music`,
+                { 
+                    duration: totalDurationSeconds, 
+                    genre: musicVibe === 'lofi' ? 'lo-fi' : musicVibe === 'corporate' ? 'corporate' : 'cinematic', 
+                    mood: musicVibe === 'sad' ? 'sad' : musicVibe === 'energetic' ? 'upbeat' : musicVibe === 'epic' ? 'epic' : 'neutral' 
+                }
+            );
+            bgmUrl = bgm.url;
+            console.log(`  > BGM: ${bgmUrl}`);
+        } else {
+            console.log(`\n> Using Custom Music: ${bgmUrl}`);
+        }
+        
+        if (genId) await updateProgress(genId, 'Generating captions...', 75);
 
         // Step 4: Captions (Whisper transcribes the first/merged voiceover)
         console.log("\n> Generating captions (Whisper)…");
         const captions = await aiService.generateCaptions(audioUrls[0] ?? '', { fps: FPS });
         console.log(`  > ${captions.length} caption segments`);
+        if (genId) await updateProgress(genId, 'Rendering video...', 90);
 
         // Step 5: Assemble VideoState
         const videoState: VideoState = {
@@ -283,7 +385,7 @@ export const aiService = {
             },
             audio: {
                 voiceoverUrl: audioUrls[0],   // Qwen3-TTS
-                bgmUrl: bgm.url,              // ACE-Step 1.5
+                bgmUrl: bgmUrl || '',         // ACE-Step 1.5 or Custom
                 volumeBgm: 0.3,
             },
             captions,                         // Whisper
@@ -292,6 +394,8 @@ export const aiService = {
 
         console.log("\n--- GENERATION COMPLETE ---");
         console.log(`Total: ${totalFrames} frames (${totalDurationSeconds.toFixed(1)}s) @ ${FPS}fps`);
+
+        if (genId) await updateProgress(genId, 'Complete!', 100);
 
         return videoState;
     },

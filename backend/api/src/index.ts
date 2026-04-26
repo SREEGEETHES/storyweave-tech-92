@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { videoRoutes } from './routes/video.js';
 import { renderRoutes } from './routes/render.js';
 import { socialRoutes } from './routes/social.js';
+import { dnaRoutes } from './routes/dna.js';
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ fastify.decorate('authenticate', async (request: any, reply: any) => {
 fastify.register(videoRoutes, { prefix: '/video' });
 fastify.register(renderRoutes, { prefix: '/render' });
 fastify.register(socialRoutes, { prefix: '/social' });
+fastify.register(dnaRoutes, { prefix: '/dna' });
 
 // Health check
 fastify.get('/health', async () => {
